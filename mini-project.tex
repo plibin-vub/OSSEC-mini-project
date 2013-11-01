@@ -1,0 +1,223 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt]{report} 
+% Default font size is 12pt, it can be changed here
+
+\usepackage{appendix}
+\usepackage{geometry} % Required to change the page size to A4
+\geometry{a4paper} % Set the page size to be A4 as opposed to the default US Letter
+
+\usepackage{graphicx} % Required for including pictures
+
+\usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
+\usepackage{wrapfig} % Allows in-line images such as the example fish picture
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\linespread{1.2} % Line spacing
+
+%\setlength\parindent{0pt} % Uncomment to remove all indentation from paragraphs
+
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+
+\textsc{\LARGE Vrije Universiteit Brussel}\\[1.5cm] 
+\textsc{\Large Operating Systems and Security}\\[0.5cm] 
+\textsc{\large Mini-project essay}\\[0.5cm] 
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Title}\\[0.4cm] % Title of your document
+\HRule \\[1.5cm]
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Pieter \textsc{Libin} % Your name
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Professor:} \\
+Prof. Dr. Martin \textsc{Timmerman} 
+% Supervisor's Name
+\end{flushright}
+\end{minipage}\\[4cm]
+
+{\large \today}\\[3cm] % Date, change the \today to a set date if you want to be precise
+
+%\includegraphics{Logo}\\[1cm] % Include a department/university logo - this will require the graphicx package
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+\tableofcontents % Include a table of contents
+
+\newpage % Begins the essay on a new page instead of on the same page as the table of contents 
+
+\chapter{Introduction} % Major section
+
+\chapter{General scope of availability and scalability}
+
+\chapter{Different aspects in cluster availability}
+
+\chapter{Scalability and its effects on economy and environment}
+
+\chapter{Identifying high availability and scalability solutions}
+\section{Cluster nodes}
+\subsection{Cluster node monitoring}
+The two major monitoring tools on GNU/Linux platforms are Nagios and
+Ganglia. Both tools implement several monitoring aspects, but the
+focus of each of the tools is different. Nagios is more oriented
+towards detecting system problems and sending out notificiations for
+such events, while Ganglia provides a long term overview of the status
+of cluster nodes. To ensure high availability, detecting problems is
+the most important aspect. The sooner problems are revealed, the
+sooner actions can be undertaken to avoid any impact on end users. It
+is imporant that problems are properly communicated to system
+administrators, since they might be able to further investigate the
+problem. In the event of any hardware failure the intervention of
+an administrator will be required. However, it is also necessary that
+ it is possible to execute programs repair the state of the cluster
+ upon the detection of failure. Nagios specializes on both these
+ issues \cite{nagios:2013}.
+In order to make new nodes available when necessary, we need to
+monitor the resource availability on all of the online nodes.
+Monitoring statistics also allows system engineers to gain insight in
+performance needs of an application over the course of time. 
+Such statistics can also be used to setup models that can be used to
+predict system load \cite{andreolini:2006}. Ganglia collects these
+kind of statistics and stores them in a round-robin database, namely RDDTool
+\cite{ganglia:2013} \cite{rrdt:2013}.
+Nagios is free software (GPL) and Ganglia's source code is licensed
+under the BSD license. Note that there also exists a commercial
+version of the Nagios software: Nagios XI. Nagios XI extends the free
+software edition by providing a richer and more powerfull web interface.
+
+\section{Computational cluster nodes}
+\subsection{Application monitoring}
+Monitoring a cluster node is not enough to garantee that it is
+properly servicing clients. It is possible that the application (for
+example: the web application server) has gotten in an infinite loop,
+and as such is using practically all CPU, but in reality is
+processing no new client request.
+A possibility to monitor applications is to keep track of the number of
+client request per seconds (or another appropriate time unit) that get
+processed and compare it with the amount of computational resources
+that is used.
+This number of client requests is very application specific; a web
+server might process thousands client requests per second, while a
+server responsable for rendering a scene in an animated movie might only process
+one request per hour \cite{apm:2013}.
+This information usually can be extraced from the log files generated
+by the server application (for example: the request log file for
+Apache httpd). This information than can be pass to Ganglia to be
+stored and monitored together with the other server's statistics
+\cite{ganglia:2013}.
+
+\subsection{Cluster node management}
+In large cluster environments, it is not possible to wait for
+a human intervention when a problem occurs. Therefore, when nodes or
+applications fall away, the monitor server should restart them.
+There are several systems that allow for programs to restart
+physical servers that reside in a rack (for example Dell's DRAC).
+Since I will only use a simulated cluster in this mini-project, I will
+only deal with starting and stopping virtualized nodes (which I think should
+be a valuable contribution taken into account the large amount of
+virtualized server that are used in datacenters these days).
+I will use VirtualBox to set up my simulated cluster, this
+virtualization software has support to start and stop virtual machines
+using the command line.
+When an application stalls but the operating system is still fully
+functioning, the monitoring server can decide to restart the server application, or
+(if the application has support for this) simply kill the thread that
+is responsible for the problems.
+
+\subsection{Load balancing proxies}
+Load balancing is a method for distributing workloads across multiple
+computing nodes. It can be used to improve the reliabilty of a system through
+redundancy and to provide scalability by sending requests the most
+available node.
+Load balancing has several applications such as High Performance
+Clusters, database servers, and HTTP servers. In this section I will
+focus on HTTP load balancing.
+A prominent TCP/HTTP load balancing proxy is HAProxy.
+\cite{haproxy:2013}. HAProxy is free software (GPLv2 for most of the
+code, LGPLv2 for some of the headers). This software supports a set of
+balancing algorithms, most notably:
+\begin{itemize}
+  \item round robin: each server is used in turns, taking into account
+    the different server's weights (these weights can be configured
+    per server and can be adjusted on the fly)
+  \item balance leastconn: the server with the lowest number of connections receives the connection
+  \item source/uri: this algorithm hashes respectively the source IP
+    or URI of the request, this hash is than divided by the total
+    weight of the running servers to determine which server should
+    receive the request
+\end{itemize}
+HAProxy also supports Access Control Lists configurations that allow
+the load balancer to select a server based on a header in the HTTP
+request. When multiple server clusters exists in different countries
+and/or continents, this feature allows us to connect a user to a
+server that is located near his own location.
+Another important aspect to consider when setting up a load balancing
+infrastructure for HTTP servers is that many dynamic web applications
+rely on session context (tarreau:2006). Since this session context is usually stored
+on the web server, it is necessary for the load balancer to pass the
+client's request to the same web server: this is called persistence.
+HAProxy provides session context persistence through `cookie
+learning' or `cookie insertion'. When using `Cookie learning' the load
+balancer will store a connection between an appliction cookie (this
+application cookie has to be configured) and a server. The
+disadvantages of this approach are:
+\begin{itemize}
+  \item the application cookie -> server mapping requires memory
+  \item if the load balancer crashes, there is no way to connect the
+    client back to the server
+\end{itemize}
+`Cookie insertion' avoids these problems by adding a cookie that
+identifies the server to the response that is sent to the client. By
+using this approach the load balancer can simply reuse the
+cookie value presented by the user to pass the request to the correct server.
+
+\chapter{Creating a `Wikpedia clone' cluster}
+interesting hints to improve performance: Tarreau:2006 article: p 17-18
+
+\chapter{Conclusion} % Major section
+
+\begin{appendices}
+\chapter{Concepts}
+Round robin (refer to this appendix from the places where round robin
+was used)
+\end{appendices}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+
+
+\bibliography{mybib}{}
+\bibliographystyle{ieeetr}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
