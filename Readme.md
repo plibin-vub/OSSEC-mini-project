@@ -1,1 +1,1 @@
-to create the PDF: latexmk
+to create the PDF: latexmk  -pdf mini-project.tex
