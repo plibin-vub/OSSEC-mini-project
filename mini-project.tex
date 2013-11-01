@@ -215,14 +215,14 @@ Data replication is relevant for both:
 We can distinguish 3 types of data replication
 \cite{datareplication:2013} :
 \subsubsection{Database replication}
-\subsubsubsection{Master-slave replication}
+\paragraph*{Master-slave replication}
 In this setup, there exists one master database, this database is the only instance
 that accepts updates. When an update statement is received by the
 master database, it is applied to the database and appended to the log. The statements
 in this log are than propagated to the slave databases.
 Most database systems support this replication strategy (Postgres \cite{postgres_db:2013},
 MySQL \cite{mysql_db:2013}, Oracle \cite{oracle_db:2013}, ...).
-\subsubsubsection{Multi-master replication}
+\paragraph*{Multi-master replication}
 In this setup, multiple master instances exists, each of these master
 instances accept updates. These updates are than communicated with the
 other master instances. 
