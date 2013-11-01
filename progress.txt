@@ -7,9 +7,17 @@
 3. Investigate the concept of "Application performance monitoring"
    Identify some techniques how application can be monitored, tie these to ganglia.
    Investigate some scripts that can parse apache httpd log files to calculate the number of requests/second.
-4. Investigate load balancing.
-   Identified HA proxy, read about the possibilities.
+4. Summarise the topics I studied in the latex document.
+5. Investigate load balancing.
+   Identified HAProxy, read about the possibilities.
 
 01/11/2013 (7h)
-1. Read more about HA proxy, identified the possible usage scenario's and read the documentation to get an idea how to configure it.
+1. Read more about HAproxy, identified the possible usage scenario's and read the documentation to get an idea how to configure it.
+2. Read about storage:
+	database replication: master/slave, multi-master, sharding/NoSQL
+	disk storage replication: DRBD, hardware RAID-1 
+	file-based replication: rsync, unison, journaled file systems
+3. Summarise the topics I studied in the latex document.
+4. Study "distributed file systems": identify gluster as an interesting technology.
+5. Start reading about sharding for MySQL and Postgresql
 
