@@ -162,7 +162,7 @@ focus on HTTP load balancing.
 A prominent TCP/HTTP load balancing proxy is HAProxy.
 \cite{haproxy:2013}. HAProxy is free software (GPLv2 for most of the
 code, LGPLv2 for some of the headers). This software supports a set of
-balancing algorithms, most notably:
+balancing algorithms \cite{tarreau:2006}, most notably:
 \begin{itemize}
   \item round robin: each server is used in turns, taking into account
     the different server's weights (these weights can be configured
@@ -180,7 +180,7 @@ and/or continents, this feature allows us to connect a user to a
 server that is located near his own location.
 Another important aspect to consider when setting up a load balancing
 infrastructure for HTTP servers is that many dynamic web applications
-rely on session context (tarreau:2006). Since this session context is usually stored
+rely on session context \cite{tarreau:2006}. Since this session context is usually stored
 on the web server, it is necessary for the load balancer to pass the
 client's request to the same web server: this is called persistence.
 HAProxy provides session context persistence through `cookie
