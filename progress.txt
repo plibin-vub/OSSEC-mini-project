@@ -10,3 +10,6 @@
 4. Investigate load balancing.
    Identified HA proxy, read about the possibilities.
 
+01/11/2013 (7h)
+1. Read more about HA proxy, identified the possible usage scenario's and read the documentation to get an idea how to configure it.
+
