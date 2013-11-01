@@ -1,0 +1,12 @@
+26/10/2013 (5.5h)
+1. Prepare a Latex document with Bibtex references.
+2. Investigate which cluster monitoring tools exist and which ones are popular:
+    - ganglia
+    - nagios
+   Describe these tools and mark their differences.
+3. Investigate the concept of "Application performance monitoring"
+   Identify some techniques how application can be monitored, tie these to ganglia.
+   Investigate some scripts that can parse apache httpd log files to calculate the number of requests/second.
+4. Investigate load balancing.
+   Identified HA proxy, read about the possibilities.
+
