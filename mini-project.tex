@@ -196,17 +196,68 @@ disadvantages of this approach are:
 `Cookie insertion' avoids these problems by adding a cookie that
 identifies the server to the response that is sent to the client. By
 using this approach the load balancer can simply reuse the
-cookie value presented by the user to pass the request to the correct server.
+cookie value presented by the user to pass the request to the correct
+server.
+
+\section{Storage}
+\subsection{Data replication}
+Data replication implies that the same date is stored on multiple
+data storage systems. This should be transparant to the end user: the
+user should not be aware of this when using the data (note that when
+working with a multi-tier architecture, it is possible that the
+`end-user'  is represented by another tier in the system).
+Data replication is relevant for both:
+\begin{itemize}
+\item high availability systems: to ensure a smooth transition from a
+  failing data storage node to a working node
+\item systems that require scalability: to make load balancing possible
+\end{itemize}
+We can distinguish 3 types of data replication
+\cite{datareplication:2013} :
+\subsubsection{Database replication}
+\subsubsubsection{Master-slave replication}
+In this setup, there exists one master database, this database is the only instance
+that accepts updates. When an update statement is received by the
+master database, it is applied to the database and appended to the log. The statements
+in this log are than propagated to the slave databases.
+Most database systems support this replication strategy (Postgres \cite{postgres_db:2013},
+MySQL \cite{mysql_db:2013}, Oracle \cite{oracle_db:2013}, ...).
+\subsubsubsection{Multi-master replication}
+In this setup, multiple master instances exists, each of these master
+instances accept updates. These updates are than communicated with the
+other master instances. 
+This has the advantages that :
+\begin{itemize}
+\item the master node can fail without interrupting the system
+\item the update load can be distributed over multiple nodes
+\end{itemize}
+There are also some significant disadvantages related to this technique:
+\begin{itemize} 
+\item increased complexity
+\item most implementations violate the ACID constraints
+\item to fix conflicts that may arise between different database
+  instances, resources of the database nodes are required and
+  communication between the conflicted nodes will increase the network
+  traffic
+\end{itemize}
+Note that there are other techniques to accomodate the advantage of
+load balancing mentioned above: database shards, NoSQL (reference to
+this section).
 
 \chapter{Creating a `Wikpedia clone' cluster}
-interesting hints to improve performance: Tarreau:2006 article: p 17-18
+interesting hints to improve performance: Tarreau:2006 article: p
+17-18 (printed)
 
 \chapter{Conclusion} % Major section
+\section{What is lacking}
+The ability to replicate journaled filesystems (by using the journal),
+like in MS DPM.
 
 \begin{appendices}
 \chapter{Concepts}
 Round robin (refer to this appendix from the places where round robin
 was used)
+ACID
 \end{appendices}
 
 %----------------------------------------------------------------------------------------
