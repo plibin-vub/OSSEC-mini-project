@@ -248,6 +248,33 @@ Note that there are other techniques to accomodate the advantage of
 load balancing mentioned above: database shards, NoSQL (reference to
 this section).
 
+\subsubsection{Disk storage replication}
+Disk storage replication collects updates to a block device and
+applies these updates collectively to multiple devices.
+This can be implemented in hardware, the functionality is than
+embedded in the array disk controller (RAID-1).
+DRBD \cite{drbd_soft:2013} implements this functionality in software.
+This software allows users to mirror disks within a system or over a
+network (the DRBD website explains this as follows: ``DRBD can be
+understood as network based raid-1'' \cite{drbd_soft:2013}).
+
+\subsubsection{File-based replication}
+Disk storage replication replicates entire block devices, however for
+some applications, it might be necessary to only replicate parts of
+the logical file system.
+\paragraph*{Batch replication}
+To replicate file systems in batch, synchronization tools such as
+rsync \cite{rsync_soft:2013} can be
+used. The rsync Unix tool can synchronize 2 directories from one location to the
+other (this can be done over a network). The advantage compared to a
+simple ``scp -r'' is that rsync will only transfer the changes by using
+delta encoding.
+\paragraph*{Real-time replication}
+I was not able to find any tools on GNU/Linux that allow real-time
+file-based replication based with default filesystems such as ext4.
+It is however possible to achieve this kind of file-based replication
+by using one of the distributed file systems, which I will discuss in
+the next section.
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
 17-18 (printed)
@@ -262,6 +289,8 @@ like in MS DPM.
 Round robin (refer to this appendix from the places where round robin
 was used)
 ACID
+RAID
+delta encoding
 \end{appendices}
 
 %----------------------------------------------------------------------------------------
