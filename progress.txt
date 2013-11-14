@@ -21,3 +21,7 @@
 4. Study "distributed file systems": identify gluster as an interesting technology.
 5. Start reading about sharding for MySQL and Postgresql
 
+14/11/2013
+1. Identify the different solutions to: make incremental database backups, make file system snapshots and to make incremental file system backups
+2. Read about RDBMS database sharding, identify that this is possible for MySQL and Postgres. Read how this can be setup for MySQL.
+3. Read about NoSQL, read how it can be useful to improve scalability. Identify some interesting solutions (MongoDB, CouchBase). 
