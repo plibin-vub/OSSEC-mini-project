@@ -324,6 +324,18 @@ are required:
   done using rsync \cite{rsync_software:2013}
 \end{itemize}
 \subsection{Distributed file systems}
+Distributed file systems share storage using a network protocol, they
+deliver scalability and failure
+correction in such a way that it is transparent to the client.
+Such filesystems can restrict access to certain files based on access lists
+and/or file system quotas. Distributed file systems allow clients to
+access files in the same way as they would be able to do on their
+local file system (note that a client might refer to an end user, 
+but it might as well refer to one of the tiers in a multi-tier
+system).
+The most interesting free software implementations I encountered were
+GlusterFS \cite{glusterfs_soft:2013} and Ceph \cite{ceph_soft:2013}
+(which also is a object and block storage system).
 
 \section{Databases}
 \section{RDBMS sharding}
@@ -361,6 +373,11 @@ and this document is stored in one file; it becomes much easier to scale the dat
 multiple clusters.
 With the booming of the ``cloud'' several document-oriented NoSQL
 solutions have been developed, most notably: CouchBase and MongoDB.
+
+\chapter{Experimenting with HA and scalability solutions}
+\section{Distributed file systems}
+ceph or glusterfs: seems to be pretty much the same, ceph backed by
+ubuntu, maybe easier to  configure on ubuntu?
 
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
