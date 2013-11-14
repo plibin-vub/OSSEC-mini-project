@@ -304,8 +304,63 @@ It is however possible to achieve this kind of file-based replication
 by using one of the distributed file systems, which I will discuss in
 the next section.
 
-\section{Distributed file systems}
+\subsection{Backup}
+Different backup strategies were discussed in chapter
+\ref{chap:aspects}, some of these strategies require methods of data
+replication (as discussed in the previous section).
+In order to setup a reliable backup system, some other technologies
+are required: 
+\begin{itemize}
+\item the ability to take a snapshot of a file system: this can be
+  achieved by using the Logical Volume Manager, which is part of the
+  mainline Linux kernel \cite{linux_kernel_soft:2013}
+\item the ability to take snapshots and incremental backups of RDBMs: most RDBMS systems
+  support this; some examples:
+  \begin{itemize}
+  \item Postgres: via barman \cite{barman_software:2013}
+  \item MySQL: via mysqldump (and by enabling the binary log)
+  \end{itemize}
+\item the ability to make incremental filesystem backups; this can be
+  done using rsync \cite{rsync_software:2013}
+\end{itemize}
+\subsection{Distributed file systems}
 
+\section{Databases}
+\section{RDBMS sharding}
+For some application, the amount of data that needs to be stored can be so high
+that it is impossible to fit it on a single cluster node. In order to
+accomodate such large database in a relational context, database
+sharding can be used. Database sharding allows databases to be
+partioned horizontally; so that different rows of the database can
+reside on different cluster nodes. It is advisable that rows that are
+closely connected are located on the same cluster node, to improve
+query performance, however, it still remains possible to execute
+queries that involve rows distributed over multiple cluster nodes.
+For example: an application where the data that is stored is mostly 
+private to a user (storage of emails, storage of Skype contacts, ...),
+ could be sharded by the user name.
+Both MySQL \cite{mysql_db:2013} and Postgres \cite{postgres_db:2013}
+support database sharding.
+\section{Document-oriented NoSQL databases}
+When the data that is stored is private to one user and performing
+queries over multiple users is a rare event (storage of emails,
+storage of Skype contacts, ...), it can be interesting to keep a
+database per user. This can be achieved by using so-called
+document-oriented NoSQL solutions. 
+These solutions are able to store a document
+containing all information related to one user. This document can for
+example be structured using the JSON format. Contrary to RDBMS
+systems; document-oriented NoSQL solutions have no schemas that define
+how the data should be structered, instead fields can be freely added
+to the JSON documents.
+Altough this provides a greater flexibility, this also makes it very
+difficult to perform queries over multiple documents that require data
+to be joined together.
+When data is grouped together in a document per entity (e.g.: a user)
+and this document is stored in one file; it becomes much easier to scale the data over
+multiple clusters.
+With the booming of the ``cloud'' several document-oriented NoSQL
+solutions have been developed, most notably: CouchBase and MongoDB.
 
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
