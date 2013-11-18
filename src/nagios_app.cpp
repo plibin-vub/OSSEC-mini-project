@@ -43,5 +43,5 @@ int main () {
 
   closelog();
 
-  return 0;
+  exit(0);
 }
