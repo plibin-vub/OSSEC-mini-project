@@ -10,16 +10,16 @@
 ### END INIT INFO
 
 # Defaults
-DAEMON_NAME="My Little Daemon"
-DAEMON_EXECUTABLE="/opt/my_daemon/my_daemon"
+DAEMON_NAME="nagios_app"
+DAEMON_EXECUTABLE="/usr/sbin/nagios_app"
 DAEMON_OPTIONS=""
-DAEMON_HOMEDIR="/opt/my_daemon"
-DAEMON_PIDFILE="/var/run/my_daemon.pid"
-DAEMON_LOGFILE="/var/log/my_daemon.log"
+DAEMON_HOMEDIR="/usr/sbin"
+DAEMON_PIDFILE="/var/run/nagios_app.pid"
+DAEMON_LOGFILE="/var/log/nagios_app.log"
 INIT_SLEEPTIME="2"
 
 # Defaults can be overridden in this file
-DAEMON_DEFAULTS_FILE="/etc/default/my_daemon"
+DAEMON_DEFAULTS_FILE="/etc/default/nagios_app"
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
