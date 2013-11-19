@@ -1,0 +1,12 @@
+define host {
+  	use		generic-host
+  	host_name	node1	
+  	address		192.168.15.4	
+}
+
+define service {
+	use 			generic-service
+	host_name 		node1	
+	service_description 	CPU Load
+	check_command 		check_nrpe_1arg!check_load
+}
