@@ -11,6 +11,10 @@
 
 \usepackage{graphicx} % Required for including pictures
 
+\usepackage{listings}
+
+\usepackage{cleveref}
+
 \usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
 \usepackage{wrapfig} % Allows in-line images such as the example fish picture
 
@@ -155,7 +159,7 @@ This number of client requests is very application specific; a web
 server might process thousands client requests per second, while a
 server responsable for rendering a scene in an animated movie might only process
 one request per hour \cite{apm:2013}.
-This information usually can be extraced from the log files generated
+This information usually can be extracted from the log files generated
 by the server application (for example: the request log file for
 Apache httpd). This information than can be pass to Ganglia to be
 stored and monitored together with the other server's statistics
@@ -305,8 +309,8 @@ by using one of the distributed file systems, which I will discuss in
 the next section.
 
 \subsection{Backup}
-Different backup strategies were discussed in chapter
-\ref{chap:aspects}, some of these strategies require methods of data
+Different backup strategies were discussed in 
+\cref{chap:aspects}, some of these strategies require methods of data
 replication (as discussed in the previous section).
 In order to setup a reliable backup system, some other technologies
 are required: 
@@ -384,6 +388,207 @@ will create these virtual machines with VirtualBox
 \cite{virtualbox_soft:2013}.  The virtual machines will have
 ``Ubuntu Linux 13.10 (AMD64) Server Edition''
 \cite{ubuntu_server_13_10:2013} installed as base operating system.
+
+I want all the virtual machines to be able to contact each other,
+while it should also be possible for them to access
+the internet.
+To make this possible, I opted to use the virtualized NAT
+VirtualBox feature (this is a new feature, available since version
+4.3).
+This new feature emulates a NAT environment on your host machine.
+The advantage of this is that the test setup will also work when no
+network is available.
+
+Created base VM, to be cloned...
+
+\noindent First we need to create the NAT network:
+\begin{lstlisting}[language=bash]
+ VBoxManage natnetwork add -t nat-int-network -n "192.168.15.0/24"
+                                               -e -h on
+\end{lstlisting}
+This commands creates the NAT network 'nat-int-network' with an IP
+address range between 192.168.15.0/24.
+After creating the NAT network, virtual machine guests can be
+configured as shown in ~\cref{fig:vbox_network_config}.
+\begin{figure}[h!]
+  \caption{VirtualBox network configuration.}
+  \label{fig:vbox_network_config}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/vbox_network_config.png}
+\end{figure}
+
+There was a problem with the system clock on the virtual machines, 
+I also added the line
+\begin{lstlisting}[language=bash]
+ export TZ=''Europe/Brussels'' 
+\end{lstlisting}
+to my $.bashrc$ file to fix this problem.
+
+\section{Monitoring}
+\subsection{Experiment overview}
+To test nagios \cite{nagios:2013}, I will test the detection of
+application and system failure. To test the application failure, I
+will write an example application that fails after
+2 minutes. I will test the system failure by inducing a kernel panic.
+When an application failure is detected I will execute a script on the
+cluster node to restart the application.
+When a system failure is detected, I will restart the virtual
+machine. 
+
+\subsection{Nagios experiment}
+I cloned the base virtual machine as described earlier and changed its
+hostname to 'monitor' (by editing $/etc/hostname$ and rebooting).
+
+
+On this machine, I installed nagios:
+\begin{lstlisting}[language=bash]
+ sudo apt-get install nagios3
+\end{lstlisting}
+During this installation a couple of questions were asked:
+\begin{itemize}
+\item email configuration: since I will not use this in my experiment
+  I did not provide a configuration 
+\item the nagios web administration password
+\end{itemize}
+In order to be able to access the web server, I opened port 80 of the
+machine's firewall. 
+I first enabled the UFW firewall:
+\begin{lstlisting}[language=bash]
+  sudo ufw enable
+\end{lstlisting} 
+Then I opened port 80:
+\begin{lstlisting}[language=bash]
+  sudo ufw allow tcp/80
+\end{lstlisting} 
+Since the NAT network setup does only allow virtual machines to access
+other virtual machines, I started my Windows virtual machine and used
+the web browser to access the nagios system. After providing the
+username and password, the browser showed the unconfigured website as
+depicted in \cref{nagios_1}.
+
+\begin{figure}[h!]
+  \caption{Nagios start page, immediately after installation.}
+  \label{fig:nagios_1}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/nagios_1.png}
+\end{figure}
+
+I cloned another pair of servers: node1 and node2, that will serve as
+cluster nodes.
+
+To test the detection of application failure, I wrote a program that
+fails after 2 minutes. As described in the previous chapter, failure
+cannot simply be defined as ``using all system resources'', since it
+is possible that the server is simply under heavy load. We need to
+look at the ratio of $\frac{number of processed items}{usage of system
+resources}$. Our test program logs a large number of (fake) transactions per
+second while using most of the CPU resources, and after 2 minutes
+stops generating transactions, after this point the program will solely occupy CPU
+resources (this event defines our failure).
+
+The source code of this program can be found in ... (nagios_app.cpp)
+I install it on node1 simply by building the source code:
+\begin{lstlisting}[language=bash]
+  g++ nagios_app.cpp -o nagios_app 
+\end{lstlisting} 
+After building the application, I copy it to $/usr/sbin/$.
+Note: in order to build this C++ code, I had to install the package
+aggregate ``build-essential'' on node1.
+
+
+In order to start/stop and restart the service, I create an init.d
+configuration script.
+I based this script on the code I found on this website: 
+http://koo.fi/blog/2013/03/09/init-script-for-daemonizing-non-forking-processes/
+I added the source code of the nagios_app init.d config script (at src/init.d/nagios_app).
+Now we still need to give the script the correct permissions:
+\begin{lstlisting}[language=bash]
+  sudo chmod 755 /etc/init.d/nagios_app
+\end{lstlisting} 
+And we need to include it in the startup list:
+\begin{lstlisting}[language=bash]
+  sudo update-rc.d myscriptname defaults
+\end{lstlisting}
+
+We now can start/stop the program very easily:
+\begin{lstlisting}[language=bash]
+  sudo /etc/init.d/nagios_app start
+  sudo /etc/init.d/nagios_app stop
+\end{lstlisting}
+
+To monitor a remote server I use the NRPE plugin for Nagios. 
+This can be easily installed on the server using this command:
+\begin{lstlisting}[language=bash]
+  sudo apt-get install nagios-nrpe-plugin
+\end{lstlisting} 
+On the server that is to be monitored (node1), we need to install the NRPE
+deamon, so that the Nagios server can communicate with the remote
+server
+\begin{lstlisting}[language=bash]
+  sudo apt-get install nagios-nrpe-server
+\end{lstlisting} 
+To allow nagios to detect the installation of the plugin, we need to
+restart apache:
+\begin{lstlisting}[language=bash]
+  sudo /etc/init.d/apache2 restart
+\end{lstlisting} 
+
+We can check whether the NRPE plugin can connect to node1, with this command:
+\begin{lstlisting}[language=bash]
+  /usr/lib/nagios/plugins/check_nrpe -H 192.168.15.4
+\end{lstlisting} 
+Upon the first try, I got this error message: ``Could not complete SSL
+handshake''.
+I was able to solve this problem by adding the server's IP address to
+the list of allowed hosts in the NPRE config file
+(/etc/nagios/nrpe.cfg) on 'node1'.
+After restarting the NRPE daemon on node1, the test worked as
+expected.
+
+Now let's configure 'monitor' to monitor the CPU load of  'node1'.
+
+I added a host and service configuration to the
+$/etc/nagios3/commands.cfg$c configuration file:
+see src/nagios_commands_config_wrong
+After making these changes I restarted apache.
+I based this actions on the official NRPE documentation
+\cite{nrpe_doc}, unfortunately, this did not result in Nagios adding
+the service to the list of monited services.
+
+After some research, I found another tutorial
+\cite{nrpe_config_tutorial},
+this tutorial mentioned I had to perform a reload of the Nagios
+service:
+\begin{lstlisting}[language=bash]
+  /etc/init.d/nagios reload 
+\end{lstlisting} 
+This command (followed by a restart of apache), allowed Nagios to
+detect the new service.
+However, Nagios was not able to collect any information from this
+service. I tested the command via the command line:
+\begin{lstlisting}[language=bash]
+  /usr/lib/nagios/plugins/check_nrpe -H 192.168.15.4 -c check_load
+\end{lstlisting} 
+The execution of this command resulted in the excpected output, 
+so I understood the problem had to be related to the nagios
+configuration.
+I searched for the problem, and found a post on stackoverflow.com
+\cite{stackoverflow_nagios},
+that mentioned the same problem as I run into (also on Ubuntu Linux). 
+The solution for this problem was explicitely instructing Nagios to
+use the $check\_nrpe$ command that only accepts 1 argument.
+When changing the configuration file like this:
+see src/nagios_commands_config_correct
+reloading Nagios and restarting apache, Nagios correctly fetched data
+on the CPU load of 'node1' as depicted in
+\cref{fig:nagios_nrpe_working_check_load}.
+
+\begin{figure}[h!]
+  \caption{Nagios showing the ``Check load'' service}
+  \label{fig:nagios_nrpe_working_check_load}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/nagios_2.png}
+\end{figure}
 
 \section{Distributed file systems}
 
