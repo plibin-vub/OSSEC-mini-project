@@ -521,16 +521,18 @@ This can be easily installed on the server using this command:
 \begin{lstlisting}[language=bash]
   sudo apt-get install nagios-nrpe-plugin
 \end{lstlisting} 
+
+To allow nagios to detect the installation of the plugin, we need to
+restart apache:
+\begin{lstlisting}[language=bash]
+  sudo /etc/init.d/apache2 restart
+\end{lstlisting} 
+
 On the server that is to be monitored (node1), we need to install the NRPE
 deamon, so that the Nagios server can communicate with the remote
 server
 \begin{lstlisting}[language=bash]
   sudo apt-get install nagios-nrpe-server
-\end{lstlisting} 
-To allow nagios to detect the installation of the plugin, we need to
-restart apache:
-\begin{lstlisting}[language=bash]
-  sudo /etc/init.d/apache2 restart
 \end{lstlisting} 
 
 We can check whether the NRPE plugin can connect to node1, with this command:
@@ -545,7 +547,7 @@ the list of allowed hosts in the NPRE config file
 After restarting the NRPE daemon on node1, the test worked as
 expected.
 
-Now let's configure 'monitor' to monitor the CPU load of  'node1'.
+Now let's configure 'monitor' to monitor the general health and CPU load of  'node1'.
 
 I added a host and service configuration to the
 $/etc/nagios3/commands.cfg$c configuration file:
@@ -553,7 +555,7 @@ see src/nagios_commands_config_wrong
 After making these changes I restarted apache.
 I based this actions on the official NRPE documentation
 \cite{nrpe_doc}, unfortunately, this did not result in Nagios adding
-the service to the list of monited services.
+the service to the list of monitored services.
 
 After some research, I found another tutorial
 \cite{nrpe_config_tutorial},
@@ -589,6 +591,80 @@ on the CPU load of 'node1' as depicted in
   \centering
     \includegraphics[width=0.5\textwidth]{pics/nagios_2.png}
 \end{figure}
+
+TODO:
+configuring check_load arguments: https://kura.io/2010/03/21/configuring-nagios-to-monitor-remote-load-disk-using-nrpe/
+which arguments are usefull for checkload:
+http://serverfault.com/questions/209566/what-warning-and-critical-values-to-use-for-check-load
+
+To do some more involved tests, I added a new node, which I called
+'node2' to my list of virtual machines. I configured this machine in
+the same way as I did on 'node1' and added it to the Nagios monitor
+server, as described earlier.
+This worked without any problems, and Nagios correctly shows the healt
+and CPU load of both servers 
+\cref{fig:nagios_nrpe_also_node2}.
+
+\begin{figure}[h!]
+  \caption{Nagios showing both nodes}
+  \label{fig:nagios_nrpe_also_node2}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/nagios_3.png}
+\end{figure}
+
+Now, let's see how Nagios properly detects system failure. To test
+this, we will induce a kernel panic on 'node1'; this can be achieved
+by inserting a kernel module that calls the panic() kernel function in
+its init function. I found source code to achieve this (src/panic/*)
+\cite{simulate_linux_crash}.
+To make the kernel crash, first we need to build the module:
+\begin{lstlisting}[language=bash]
+ make
+\end{lstlisting} 
+Now we can insert the module into our running kernel:
+\begin{lstlisting}[language=bash]
+ sudo insmod force_panic.ko
+\end{lstlisting} 
+This immediately causes a kernel panic \cref{fig:kernel_panic}.
+\begin{figure}[h!]
+  \caption{'node1' experiencing a kernel panic}
+  \label{fig:kernel_panic}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/kernel_panic.png}
+\end{figure}
+After about one minute, this failure was detected by nagios, and the
+user interface depicted a ``Critical error'' \cref{fig:nagios_after_kernel_panic}.
+
+\begin{figure}[h!]
+  \caption{Nagios showing a critical error after a kernel panic}
+  \label{fig:nagios_after_kernel_panic}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/nagios_after_kernel_panic.png}
+\end{figure}
+
+If a node experiences a system failure, it is useful when an action is
+performed that tries to solve the problem. An Ubuntu server can be
+configured to automatically restart upon a kernel panic
+\cite{restart_upon_kernel_panic}, however, when an hardware problem is
+the cause of the system crash, restarting the node will be of no
+avail. It is better to start a new node, and investigate the problem
+on the crashed node in detail.
+
+It is possible to configure an event handler for a Nagios
+service. This handler will execute a script on the monitor
+server, every time an exceptional event occurs.
+For our simulation, we will execute this scenario:
+\begin{itemize}
+\item crash 'node1'
+\item Nagios will notice this crash and an evenhandler will be
+  triggered
+\item this event handler will send a message to the virtual machine
+  controller (in our setup, this is the MacOS X host operating
+  system)
+\item when the controller receives this message, it will start 'node2'
+\end{itemize}
+Sending a message will be implemented as writing a file to a shared
+file system.
 
 \section{Distributed file systems}
 
