@@ -735,7 +735,132 @@ of cluster nodes. Note that an actual setup might be more
 involved; we would for example keep a pool of available systems that
 can be started when one of the running cluster nodes fails. In a
 cluster environment, our VBoxManage call might be replaced with a
-command to direct a hardware controller to power on an available rack server.
+command to direct a hardware controller to power on an available rack
+server.
+
+Reference to movie: movies/nagios-setup.mov
+
+\subsection{Ganglia experiment}
+I will use the same set of virtual machines to setup the Ganglia
+experiment: 'node1', 'node2' and 'monitor'.
+The 'monitor' node will periodically ask the client nodes for their
+metrics and store these metrics in a round-robin database (see
+appendix).
+To install the software required for this monitoring (gmetad) we execute the
+following command:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ganglia-monitor gmetad
+\end{lstlisting} 
+
+These programs only include the monitoring system, in order to
+visualize the results in a web interface we should also install the
+web-frontend:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ganglia-webfronted
+\end{lstlisting} 
+
+Ganglia supports 2 modes: multicast (zie appendix) and unicast mode.
+Misschien een beetje uitleg over het verschil.
+The multicast is the detault mechanism, and is the easiest way to
+configure a Ganglia cluster.
+For our test setup, where we have an explict monitor server, we will
+configure Ganglia using unicast mode.
+
+Let's start by configuring the 'monitor' cluster node. I adapted the
+default configuration file that was installed with Ganglia based on an
+ installation manual \cite{ganglia_install_manual}.
+Here a listing of the most important changes I've made:
+src/ganglia\_monitor\_config
+
+The most imporant segments of this configuration listing are:
+\begin{itemize}
+\item $deaf = no$: the monitor server should listen to the cluster
+  nodes
+\item cluster name
+\item channel (UDP/TCP) configurations
+\end{itemize}
+
+To configure the cluster nodes, we only need to install ganglia-monitor:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ganglia-monitor
+\end{lstlisting} 
+
+I adapted the
+default configuration file that was installed with Ganglia based on an
+ installation manual \cite{ganglia_install_manual}.
+Here a listing of the most important changes I've made:
+src/ganglia\_node\_config
+
+The most imporant segments of this configuration listing are:
+\begin{itemize}
+\item $deaf = yes$: the cluster nodes should not listen to other
+  cluster nodes, but only send their data to the monitor server
+\item cluster name
+\item channel (UDP) configuration
+\end{itemize}
+
+To finalize the configuration, we need to configure gmetad on
+'monitor', we can do this by providing gmetad with this config file
+(located at /etc/ganglia/gmetad.conf):
+\begin{lstlisting}[language=bash]
+data_source "OSSEC" localhost
+\end{lstlisting} 
+
+To allow the cluster nodes to send their data to the monitor server,
+we still need to open the UDP port $gmetad$ is listening on:
+ \begin{lstlisting}[language=bash]
+sudo ufw allow 8649/udp
+\end{lstlisting} 
+
+OK, let's take it for as spin! When trying to access the web
+application, there was a problem, apache was not aware of the ganglia
+web application. After copying the ganglia apache configuration to
+$/etc/apache2/sites-enabled$, the web application was functional and
+show a general overview \cref{fig:ganglia_general}.
+\begin{figure}[h!]
+  \caption{Ganglia's general overview}
+  \label{fig:ganglia_general}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/ganglia_general.png}
+\end{figure}
+All configured nodes were detected, and an overview of the CPU load of
+all 3 nodes was visible on the bottom of the Ganglia's web application
+start page  \cref{fig:ganglia_node_overview}.
+\begin{figure}[h!]
+  \caption{Ganglia's node overview}
+  \label{fig:ganglia_node_overview}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/ganglia_node_overview.png}
+\end{figure}
+I've started nagios\_app (reference to the previous section) on 'node1'
+(IP=192.168.15.4) to put the node under heavy load. This clearly is
+visible in the node overview \cref{fig:ganglia_node_overview}.
+
+Since the collected metrics are stored in a round-robin database, it is possible to
+extract this data to do research on it. Such research can help
+companies to predict/anticipate sudden changes in system load.
+
+All data is stored in $/var/lib/ganglia/rrds/$, for each cluster,
+there is a directory. In a cluster directory, each node that belongs
+to the cluster has a directory with its name/IP address.
+For example: if we want to look at the CPU user-usage of our 'node1',
+we need to query this file:
+$/var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd$. This file is
+encoded in a binary format; we can export it to a CSV-file using the
+rrd2csv program \cite{rrd2csv}:
+\begin{lstlisting}[language=bash]
+perl rrd2csv.pl  /var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd > node1_cpu_user.csv
+\end{lstlisting} 
+
+However, this command will only export the data of the last minute. To
+export all data that was collected starting from a point further in time, we need to
+explicitely pass the start date in epoch format (see appendix).
+An example to extract all data that is one hour old:
+\begin{lstlisting}[language=bash]
+now = `date +%s`
+one_hour_ago = `expr $now - 3600` 
+perl rrd2csv.pl -start $one_hour_ago /var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd > node1_cpu_user.csv
+\end{lstlisting} 
 
 
 
@@ -757,6 +882,7 @@ like in MS DPM.
 \chapter{Concepts}
 Round robin (refer to this appendix from the places where round robin
 was used)
+Round robin database
 ACID
 RAID
 delta encoding
