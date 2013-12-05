@@ -865,6 +865,26 @@ perl rrd2csv.pl -start $one_hour_ago /var/lib/ganglia/rrds/OSSEC/192.168.15.4/cp
 This kind of data can be imported directly by statistical analysis
 environments such as R \cite{r_software}.
 
+\subsection{Nagios and Ganglia: conclusions and remarks}
+nagios:
+pos: 
+-event handling -> very powerful
+-very extensible + configurable
+neg:
+-doc is not allways up to date + sometimes incomplete
+-difficult installation (largely because of the docs, also because
+quite a lot of manual steps were necessary)
+ganglia:
+pos:
+- installation -> easy (apt-get + some config for the unicast mode)
+- project doc -> seems ok
+- data stored in a round-robin db by default: exist a lot of software
+to query/extract/graph data in such databases
+neg:
+?
+
+both systems very interesting and mostly complementary
+
 \section{Distributed file systems}
 
 ceph or glusterfs: seems to be pretty much the same, ceph backed by
