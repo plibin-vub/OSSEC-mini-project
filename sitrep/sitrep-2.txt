@@ -1,0 +1,55 @@
+Dear Professor Timmerman, Mr. Fayyad-Kazan,
+
+This mail contains my second bi-weekly situation report for the OSSEC mini-project.
+
+1. What did I do.
+
+14/11/2013 (6h)
+1. Identify the different solutions to: make incremental database backups, make file system snapshots and to make incremental file system backups
+2. Read about RDBMS database sharding, identify that this is possible for MySQL and Postgres. Read how this can be setup for MySQL.
+3. Read about NoSQL, read how it can be useful to improve scalability. Identify some interesting solutions (MongoDB, CouchBase).
+4. Read about distributed file systems, read about the possibilities, advantages, transparency towards the end user. Read about Ceph, GlusterFS: differences, benchmarks.
+5. Install a base version of Ubuntu Server. Read how to configure the network so all cluster nodes can contact each other. 
+
+18/11/2013 (9h)
+1. Configure an emulated NAT in VirtualBox, so all cluster nodes can contact each other, without the need to be connected to a real network.
+2. Create 3 virtual machines: 'monitor', 'node1', 'node2' by cloning the base virtual machine and configure them (hostname, timezone, …).
+3. Install the Nagios server software on 'monitor'.
+4. Install the NRPE daemon on the nodes ('node1','node2')
+5. Test the setup, fix some problems.
+6. Configure to do a CPU load test on 'node1', fix some problems.
+7. Write a C++ program to test the ratio CPU usage/number of processed transactions.
+8. Write a init.d script to start/stop the aforementioned C++ program in a deamonised way.
+9. Test the program, do some fixes.
+
+19/11/2013 (2h)
+1. Write out the different steps I did on 18/11 (add screenshots, source code, config file sections).
+2. Learn how to add screenshots in Latex and how to reference them.
+3. Test the check_load service.
+4. Read which threshold values are useful for checking the CPU load.
+4. Write a backup script to backup my virtual machine "lab" properly.
+
+2. What will I do in the next period.
+I plan to spend between 10-12 hours in the next 2 weeks.
+I will continue with Nagios (to make it discover system failure), I will also try to make Nagios restart a crashed node and start a new node when a node is under heavy load.
+I will try to install Ganglia to monitor CPU usage over a long time.
+I will install HAProxy and make it distribute its connection over 2 nodes (based on the least-conn configuration).
+
+In total I spend 17 hours (as I estimated in my previous SITREP).
+
+3. Problems.
+It took me quite some time to properly configure Nagios, there we some things missing in the documentation. There was also a problem to run a check on a remote node (using NRPE), after some reading I was also able to fix this problem.
+
+4. Open issues.
+At this moment there are no open issues.
+
+5. Assistance
+At this moment no assistance is required.
+
+6. Other urgent matters
+None.
+
+Kind regards,
+
+Pieter Libin
+Working student "Master in Applied Informatics"
