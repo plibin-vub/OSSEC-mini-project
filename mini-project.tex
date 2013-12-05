@@ -862,7 +862,8 @@ one_hour_ago = `expr $now - 3600`
 perl rrd2csv.pl -start $one_hour_ago /var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd > node1_cpu_user.csv
 \end{lstlisting} 
 
-
+This kind of data can be imported directly by statistical analysis
+environments such as R \cite{r_software}.
 
 \section{Distributed file systems}
 
