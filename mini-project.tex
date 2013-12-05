@@ -15,6 +15,8 @@
 
 \usepackage{cleveref}
 
+\usepackage{tikz}
+
 \usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
 \usepackage{wrapfig} % Allows in-line images such as the example fish picture
 
@@ -68,6 +70,26 @@ Prof. Dr. Martin \textsc{Timmerman}
 \vfill % Fill the rest of the page with whitespace
 
 \end{titlepage}
+
+\newcounter{treeline}
+
+\newcommand{\treeroot}[1]{% Title
+\node[above] at (0,0) {#1};%
+\setcounter{treeline}{0}
+}
+
+\newcommand{\treeentry}[2]{% Title, Level
+\draw[->] (#2-1,-\value{treeline}/2) -- (#2-1,-\value{treeline}/2-0.5) -- (#2+0.5,-\value{treeline}/2-0.5) node[right] {#1};
+\stepcounter{treeline}
+}
+
+\newcommand{\altentry}[2]{% Title, Level
+\draw[->] (#2-1,-\value{treeline}/2) -- (#2-1,-\value{treeline}/2-0.5) -- (#2+0.5,-\value{treeline}/2-0.5) node[right] {#1};
+\foreach \x in {1,...,#2}
+{   \draw (\x-1,-\value{treeline}/2) -- (\x-1,-\value{treeline}/2-0.5);
+}
+\stepcounter{treeline}
+}
 
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
@@ -400,6 +422,9 @@ The advantage of this is that the test setup will also work when no
 network is available.
 
 Created base VM, to be cloned...
+Shared filesystem: to allow automatic mounting -> guest additions.
+To allow other users to acces this directory, add them to the vboxsf group.
+
 
 \noindent First we need to create the NAT network:
 \begin{lstlisting}[language=bash]
@@ -418,11 +443,11 @@ configured as shown in ~\cref{fig:vbox_network_config}.
 \end{figure}
 
 There was a problem with the system clock on the virtual machines, 
-I also added the line
-\begin{lstlisting}[language=bash]
- export TZ=''Europe/Brussels'' 
-\end{lstlisting}
-to my $.bashrc$ file to fix this problem.
+I was able to fix this problem by installing the VirtualBox guest
+additions.
+Installing guest editions:
+-install build-essential
+-run script of vbox
 
 \section{Monitoring}
 \subsection{Experiment overview}
@@ -437,7 +462,8 @@ machine.
 
 \subsection{Nagios experiment}
 I cloned the base virtual machine as described earlier and changed its
-hostname to 'monitor' (by editing $/etc/hostname$ and rebooting).
+hostname to 'monitor' (by editing $/etc/hostname$ and $/etc/hosts$ and
+rebooting). (also mention this for the nodes???)
 
 
 On this machine, I installed nagios:
@@ -486,21 +512,20 @@ second while using most of the CPU resources, and after 2 minutes
 stops generating transactions, after this point the program will solely occupy CPU
 resources (this event defines our failure).
 
-The source code of this program can be found in ... (nagios_app.cpp)
+The source code of this program can be found in ... $(nagios\_app.cpp)$
 I install it on node1 simply by building the source code:
 \begin{lstlisting}[language=bash]
   g++ nagios_app.cpp -o nagios_app 
 \end{lstlisting} 
 After building the application, I copy it to $/usr/sbin/$.
-Note: in order to build this C++ code, I had to install the package
-aggregate ``build-essential'' on node1.
-
+Note: in order to build this C++ code, we need gcc, this is included
+in the package build-essential, which was installed earlier. 
 
 In order to start/stop and restart the service, I create an init.d
 configuration script.
 I based this script on the code I found on this website: 
 http://koo.fi/blog/2013/03/09/init-script-for-daemonizing-non-forking-processes/
-I added the source code of the nagios_app init.d config script (at src/init.d/nagios_app).
+I added the source code of the nagios\_app init.d config script $(at src/init.d/nagios\_app)$.
 Now we still need to give the script the correct permissions:
 \begin{lstlisting}[language=bash]
   sudo chmod 755 /etc/init.d/nagios_app
@@ -550,8 +575,8 @@ expected.
 Now let's configure 'monitor' to monitor the general health and CPU load of  'node1'.
 
 I added a host and service configuration to the
-$/etc/nagios3/commands.cfg$c configuration file:
-see src/nagios_commands_config_wrong
+$/etc/nagios3/commands.cfg$ configuration file:
+see src/nagios\_commands\_config\_wrong
 After making these changes I restarted apache.
 I based this actions on the official NRPE documentation
 \cite{nrpe_doc}, unfortunately, this did not result in Nagios adding
@@ -580,7 +605,7 @@ that mentioned the same problem as I run into (also on Ubuntu Linux).
 The solution for this problem was explicitely instructing Nagios to
 use the $check\_nrpe$ command that only accepts 1 argument.
 When changing the configuration file like this:
-see src/nagios_commands_config_correct
+see src/nagios\_commands\_config\_correct
 reloading Nagios and restarting apache, Nagios correctly fetched data
 on the CPU load of 'node1' as depicted in
 \cref{fig:nagios_nrpe_working_check_load}.
@@ -593,7 +618,7 @@ on the CPU load of 'node1' as depicted in
 \end{figure}
 
 TODO:
-configuring check_load arguments: https://kura.io/2010/03/21/configuring-nagios-to-monitor-remote-load-disk-using-nrpe/
+configuring check\_load arguments: https://kura.io/2010/03/21/configuring-nagios-to-monitor-remote-load-disk-using-nrpe/
 which arguments are usefull for checkload:
 http://serverfault.com/questions/209566/what-warning-and-critical-values-to-use-for-check-load
 
@@ -601,7 +626,7 @@ To do some more involved tests, I added a new node, which I called
 'node2' to my list of virtual machines. I configured this machine in
 the same way as I did on 'node1' and added it to the Nagios monitor
 server, as described earlier.
-This worked without any problems, and Nagios correctly shows the healt
+This worked without any problems, and Nagios correctly shows the health
 and CPU load of both servers 
 \cref{fig:nagios_nrpe_also_node2}.
 
@@ -664,7 +689,55 @@ For our simulation, we will execute this scenario:
 \item when the controller receives this message, it will start 'node2'
 \end{itemize}
 Sending a message will be implemented as writing a file to a shared
-file system.
+directory. This directory has the following layout:
+\begin{lstlisting}[language=bash]
+ ./nodes/node1
+ ./nodes/node2
+\end{lstlisting} 
+First let's define an eventhandler that places a file named 'crash' in the
+shared directory $./nodes/node1/$ whenever Nagios detects a critical
+error.
+For this to work we need to configure an event handler connected to
+the host, we can do this by adding this line to the host definition ($/etc/nagios3/commands.cfg$ ) of 'node1':
+\begin{lstlisting}[language=bash]
+event_handler   inform-controller
+\end{lstlisting} 
+We now have to define the $inform-controller$ command:
+\begin{lstlisting}[language=bash]
+define command {
+    command_name    inform-controller
+    command_line    /soft/nagios/scripts/inform-controller.sh
+$HOSTNAME$ $HOSTSTATE$
+}
+\end{lstlisting} 
+The script inform-controller simply creates a file
+$/media/sf\_ossec\_vm\_share/nodes/node1/crash$ whenever Nagios
+detects 'node1' goes down.
+Find the code for the inform-controller.sh script below:
+see: src/inform-controller.sh
+
+Now we need to detect the creation of the file
+$/media/sf\_ossec\_vm\_share/nodes/node1/crash$  on the controller,
+which is a MacOS X system in my testing environment. On MacOS X, this
+can be implemented using ``Folder actions'', with some customized scripts
+\cite{folder_actions_bash} it is possible to execute bash scripts when
+an file event occurs.
+I configured my MacOS X operating system to run this script whenever a
+file was added to one of the node directories:
+
+This script will check whether a crash file exists in the $./nodes/node1$
+directory, and if this is the case, start 'node2' using VirtualBox's
+command line tools. 
+Source of the script src/FolderActions.sh
+
+This simple setup shows how Nagios can be used to react on the failure
+of cluster nodes. Note that an actual setup might be more
+involved; we would for example keep a pool of available systems that
+can be started when one of the running cluster nodes fails. In a
+cluster environment, our VBoxManage call might be replaced with a
+command to direct a hardware controller to power on an available rack server.
+
+
 
 \section{Distributed file systems}
 
