@@ -24,7 +24,7 @@ host {
 } 
 
 udp_send_channel { 
-  mcast_join = 192.168.15.6
+  host = 192.168.15.6
   port = 8649 
   ttl = 1 
 } 
