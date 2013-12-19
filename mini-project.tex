@@ -206,6 +206,7 @@ functioning, the monitoring server can decide to restart the server application,
 is responsible for the problems.
 
 \subsection{Load balancing proxies}
+\label{sec:load_balancing_proxies}
 Load balancing is a method for distributing workloads across multiple
 computing nodes. It can be used to improve the reliabilty of a system through
 redundancy and to provide scalability by sending requests the most
@@ -279,6 +280,12 @@ master database, it is applied to the database and appended to the log. The stat
 in this log are than propagated to the slave databases.
 Most database systems support this replication strategy (Postgres \cite{postgres_db:2013},
 MySQL \cite{mysql_db:2013}, ...).
+Mention uses:
+- backup of database
+- use a slave database without causing load on the master (statistics
+for example)
+- scale out: for read only access, let a proxy determine which slave
+needs to be used
 
 \paragraph*{Multi-master replication}
 In this setup, multiple master instances exists, each of these master
@@ -484,7 +491,7 @@ I first enabled the UFW firewall:
 \end{lstlisting} 
 Then I opened port 80:
 \begin{lstlisting}[language=bash]
-  sudo ufw allow tcp/80
+  sudo ufw allow 80/tcp
 \end{lstlisting} 
 Since the NAT network setup does only allow virtual machines to access
 other virtual machines, I started my Windows virtual machine and used
@@ -884,6 +891,290 @@ neg:
 ?
 
 both systems very interesting and mostly complementary
+
+\section{HAProxy experiment}
+HAProxy is a prominent software load balancer. It acts like a reverse
+proxy; pretending it is the main server and then forwarding the
+requests to one of the HTTP server cluster nodes.
+Several strategies are available to distribute requests over a HTTP
+server cluster; these strategies are explained in
+\ref{sec:load_balancing_proxies}.
+In this experiment, I will setup a HAProxy that sends requests to 2
+HTTP server cluster nodes using the 'roundrobin' distribution
+strategy.
+\subsection{HAProxy installation}
+I will install HAProxy on a new Ubuntu virtual machine: 'haproxy'.
+I will use the virtual machines 'node1' and 'node2' as HTTP server cluster nodes.
+Let's start by properly configuring 'node1' and 'node2' that it can
+serve this simple PHP program (from \cite{haproxy_install_tutorial}):
+\label{lst:test_php}
+\begin{lstlisting}[language=php]
+<?php
+header('Content-Type: text/plain');
+echo "Server IP: ".$_SERVER['SERVER_ADDR'];
+echo "\nClient IP: ".$_SERVER['REMOTE_ADDR'];
+echo "\nX-Forwarded-for: ".$_SERVER['HTTP_X_FORWARDED_FOR'];
+?>
+\end{lstlisting} 
+This program will print the HTTP server's IP address, the client IP
+address (which in our case will be the IP address of our HAProxy
+server) and the X-Forwarded-for header (which will allow us to identify
+the originating IP adress: i.e. the IP-address of our browser).
+First we'll need to install Apache and PHP:
+\begin{lstlisting}[language=bash]
+sudo apt-get install apache2
+sudo apt-get install php5
+sudo apt-get install libapache2-mod-php5
+sudo /etc/init.d/apache2 restart
+\end{lstlisting} 
+Now we can copy our test program \ref{lst:test_php} to
+$/var/www/test.php$.
+
+Then I opened port 80:
+\begin{lstlisting}[language=bash]
+  sudo ufw allow 80/tcp
+\end{lstlisting} 
+
+After these changes, the nodes were able to serve this PHP test
+program: \ref{fig:test_php_working}.
+
+\begin{figure}[h!]
+  \caption{Test PHP program working in a browser}
+  \label{fig:test_php_working}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/test_php_working.png}
+\end{figure}
+
+To install HAProxy:
+\begin{lstlisting}[language=bash]
+apt-get install haproxy
+\end{lstlisting} 
+After this installation, a reboot of the virtual machine was required.
+In order to make HAProxy start by the init script we need to put the
+ENABLED variable in $/ect/default/haproxy$ to $1$.
+I use the HAProxy config file that is installed with the haproxy
+Ubuntu package comes with a proper config file by default (reference appendix src/haproxy_basic.cfg).   
+In order to configure HAProxy for a specific application, I conceived
+this configuration snippet:
+\begin{lstlisting}[language=bash]
+listen ossec_app 0.0.0.0:80
+        mode http
+        balance roundrobin
+        option forwardfor
+        server node1 192.168.15.4:80 check
+        server node2 192.168.15.8:80 check
+\end{lstlisting} 
+This configuration defines the application ossec_app on port 80.
+I use the 'roundrobin' algorithm, enabled the forwardfor (so we can read
+the X-Forwarded-for HTTP header in our PHP test program) and added our 2
+HTTP server cluster nodes to the configuration.
+Then I opened port 80 on the 'haproxy' server:
+\begin{lstlisting}[language=bash]
+  sudo ufw allow 80/tcp
+\end{lstlisting} 
+
+\subsection{HAProxy testing}
+After making the configurations as described in the previous section, I could visit the test PHP program via the
+haproxy server (IP address: 192.168.15.10); as demonstrated in \ref{fig:haproxy_working_browser}.
+
+\begin{figure}[h!]
+  \caption{Testing the haproxy setup in a browser}
+  \label{fig:haproxy_working_browser}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/haproxy_working_browser.png}
+\end{figure}
+
+When testing this setup, it becomes clear that HAProxy forwards the
+request to both cluster nodes (subsequently to 'node1' and than to
+'node2').
+I recorded a video to demonstrate this behaviour (reference to
+haproxy.mov).
+
+This setup also handles failure of nodes, if we shutdown apache on one
+of the nodes, HAProxy will automatically forward the incoming requests
+to the working node. 
+I recorded a video to demonstrate this behaviour (reference to
+haproxy-failover.mov).
+
+\subsection{Conclusion and remarks}
+I was able to extract a lot of valuable information from this online
+article: \cite{haproxy_install_tutorial}. The online documentation of
+ HAProxy \cite{haproxy:2013} is also very good, and explains all
+ configuration items in detail, often with some pointers on when an
+ how to use them. The documentation for example advices not to use the
+ 'leastconn' algorithm for HTTP services, since this algorithm is not
+ well-suited for services that use short-lived sessions.
+The installation went smoothly on Ubuntu, some manual configurations
+were necessary, but since the documentation of the project is clear
+and up-to-date, this did not cause any problems.
+
+\section{Database replication experiment}
+I will setup a master-slave replicated MySQL database. I will use the
+'haproxy' virtual machine to act as my master database and I will
+install 2 slave databases on my 'node1' and 'node2' virtual machines.
+cite : official documentation +
+http://www.howtoforge.com/mysql_database_replication  + 
+http://dba.stackexchange.com/questions/8680/what-is-the-best-way-to-create-mysql-master-slave-replication-setup-and-troubles
+
+\subsection{Installation} 
+I will start by installing mysql (server and client) on all the involved virtual
+machines ('haproxy','node1','node2').
+\begin{lstlisting}[language=bash]
+sudo apt-get install mysql-server mysql-client
+\end{lstlisting}
+
+Let's create a test database on our master-node:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> CREATE DATABASE ossec;
+\end{lstlisting}
+No we can use this database, and create a simple table in it:
+\begin{lstlisting}[language=bash]
+mysql> USE ossec;
+mysql> CREATE TABLE friend (first_name text, last_name text);
+\end{lstlisting}
+And we add a friend to it:
+\begin{lstlisting}[language=bash]
+mysql> INSERT INTO friend (first_name, last_name) values ('Eric',
+'Northman');
+\end{lstlisting}
+
+The next step is the configuration of the master. Most of the
+configuration is done in $/etc/mysql/my.cnf$.
+First we need to comment out the bind-address line, this will inform MySQL
+to listen on all IP addresses rather than only on localhost:
+\begin{lstlisting}[language=bash]
+#bind-address        = 127.0.0.1
+\end{lstlisting}
+MySQL slaves use the logs that a master-node generates to replicate
+the database. In order to make this work, we need to tell the MySQL
+master-node where to
+generate these log files and for which databases the log files need to
+be generated. 
+\begin{lstlisting}[language=bash]
+log-bin = /var/log/mysql/bin.log
+#multiple binlog-do-db lines are allowed
+binlog-do-db = ossec
+\end{lstlisting}
+We need to specify the server's id as well, since this is our master
+server, we use $id=1$:
+\begin{lstlisting}[language=bash]
+server-id = 1
+\end{lstlisting}
+Now we're ready for restarting the database:
+\begin{lstlisting}[language=bash]
+sudo /etc/init.d/mysql restart
+\end{lstlisting}
+We need to give a MySQL user (let call him 'reppy') the permission to replicate our
+database:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> GRANT REPLICATIOn SLAVE ON *.* TO 'reppy'@''%' IDENTIFIED BY
+                                %'reppy_password';
+mysql> FLUSH PRIVILEGES;
+\end{lstlisting}
+wat doet die percent in de sql code hierboven?
+
+To get the information to configure the slave, we need to execute these
+commands to select our database 'ossec' and lock all the tables in it:
+\begin{lstlisting}[language=bash]
+mysql> USE ossec;
+mysql> FLUSH TABLES WITH READ LOCK;
+\end{lstlisting}
+No we can extract the information we need:
+\begin{lstlisting}[language=bash]
+mysql> SHOW MASTER STATUS;
+\end{lstlisting}
+The output of this command is:
+\begin{lstlisting}[language=bash]
++---------------+----------+--------------+------------------+
+| File          | Position | Binlog_do_db | Binlog_ignore_db |
++---------------+----------+--------------+------------------+
+| bin.000003    | 333      | ossec        |                  |
++---------------+----------+--------------+------------------+
+1 row in set (0.00 sec)
+\end{lstlisting}
+Now we need to dump the current database:
+\begin{lstlisting}[language=bash]
+mysqldump -u root -p --opt ossec > ossec.sql
+\end{lstlisting}
+
+It is important to unlock the tables again before we continue:
+\begin{lstlisting}[language=bash]
+mysql> UNLOCK TABLES;
+\end{lstlisting}
+
+To allow the slave nodes to connect to the master database, we need to
+open up the MySQL port ($3306$) of the master node:
+\begin{lstlisting}[language=bash]
+sudo ufw allow 3306/tcp
+\end{lstlisting}
+
+Now let's configure the slaves, we start by creating the 'ossec'
+database on the slaves:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> CREATE DATABASE ossec;
+\end{lstlisting}
+Now we need to apply the dump we obtained on the master server (I
+copied the ossec.sql using $scp$):
+\begin{lstlisting}[language=bash]
+mysql -u root -p ossec < ossec.sql
+*type password*
+\end{lstlisting}
+
+Next we configure the server-id and the database that is replicated in
+$/etc/mysql/my.cnf$:
+\begin{lstlisting}[language=bash]
+#node 1
+server-id = 2 
+#node 2
+server-id = 3
+
+#same for node 1 and 2
+replicate-do-db = ossec
+\end{lstlisting}
+
+After these configurations, we need to restart the MySQL server:
+\begin{lstlisting}[language=bash]
+sudo /etc/init.d/mysql restart
+\end{lstlisting}
+
+And execute this SQL to let the slave know where to find its master:
+\begin{lstlisting}[language=bash]
+mysql> CHANGE MASTER TO MASTER_LOG_FILE='bin.000003',
+MASTER_LOG_POS=333, MASTER_HOST='192.168.15.10', MASTER_USER='reppy', MASTER_PASSWORD='reppy_password';
+\end{lstlisting}
+Now we can start the slave:
+\begin{lstlisting}[language=bash]
+mysql> START SLAVE;
+\end{lstlisting}
+
+\subsection{Testing the experiment setup}
+After this, when a change is made to the master database, these
+changes are automatically propagated to the slave databases. I
+recorded a video to demonstrate this with my test setup (reference
+mysql_replication.mov).
+
+\subsection{Conclusion and remarks}
+Setting up a replicated MySQL environment was not easy, mainly since I
+had to consult several seperate documents. The main problem seems to
+be that the way things are configured in MySQL seems to change significantly
+over time. Several settings I found in different tutorials, were no
+longer supported on the most recent MySQL package distributed with
+Ubuntu.
+On the other hand, if something went wrong or behaved unexpectedly,
+the output in the log files was quite informative. 
+One important remark is that on a slave node, it is no longer possible
+to configure the master settings (host, log_pos, log_file, user,
+password) in the configuration file; you should use the $CHANGE
+MASTER ...$ SQL command.
+
+\section{Software disk replication experiment}
+
 
 \section{Distributed file systems}
 
