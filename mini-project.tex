@@ -996,7 +996,7 @@ to the working node.
 I recorded a video to demonstrate this behaviour (reference to
 haproxy-failover.mov).
 
-\subsection{Conclusion}
+\subsection{Conclusion and remarks}
 I was able to extract a lot of valuable information from this online
 article: \cite{haproxy_install_tutorial}. The online documentation of
  HAProxy \cite{haproxy:2013} is also very good, and explains all
@@ -1106,6 +1106,12 @@ It is important to unlock the tables again before we continue:
 mysql> UNLOCK TABLES;
 \end{lstlisting}
 
+To allow the slave nodes to connect to the master database, we need to
+open up the MySQL port ($3306$) of the master node:
+\begin{lstlisting}[language=bash]
+sudo ufw allow 3306/tcp
+\end{lstlisting}
+
 Now let's configure the slaves, we start by creating the 'ossec'
 database on the slaves:
 \begin{lstlisting}[language=bash]
@@ -1147,12 +1153,30 @@ Now we can start the slave:
 mysql> START SLAVE;
 \end{lstlisting}
 
+\subsection{Testing the experiment setup}
 After this, when a change is made to the master database, these
 changes are automatically propagated to the slave databases. I
-recorded a video to demonstrate this with my test setup (reference mysql_replication.mov).
+recorded a video to demonstrate this with my test setup (reference
+mysql_replication.mov).
+
+\subsection{Conclusion and remarks}
+Setting up a replicated MySQL environment was not easy, mainly since I
+had to consult several seperate documents. The main problem seems to
+be that the way things are configured in MySQL seems to change significantly
+over time. Several settings I found in different tutorials, were no
+longer supported on the most recent MySQL package distributed with
+Ubuntu.
+On the other hand, if something went wrong or behaved unexpectedly,
+the output in the log files was quite informative. 
+One important remark is that on a slave node, it is no longer possible
+to configure the master settings (host, log_pos, log_file, user,
+password) in the configuration file; you should use the $CHANGE
+MASTER ...$ SQL command.
+
+\section{Software disk replication experiment}
 
 
-\subsection{Distributed file systems}
+\section{Distributed file systems}
 
 ceph or glusterfs: seems to be pretty much the same, ceph backed by
 ubuntu, maybe easier to  configure on ubuntu?
