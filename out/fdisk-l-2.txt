@@ -1,0 +1,10 @@
+
+Disk /dev/sdb: 1073 MB, 1073741824 bytes
+139 heads, 8 sectors/track, 1885 cylinders, total 2097152 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x1053cb0b
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sdb1            2048     2097151     1047552   83  Linux
