@@ -1,0 +1,54 @@
+Dear Professor Timmerman, Mr. Fayyad-Kazan,
+
+This mail contains my third bi-weekly situation report for the OSSEC mini-project.
+
+1. What did I do.
+
+04/12/2013 (2h)
+1. Inducing a Linux kernel crash by inserting a kernel module in the kernel that calls panic() upon init.
+2. I created a second cluster node virtual machine ('node2'), that I configured in the same way as the first cluster node ('node1'). I also configured Nagios on this node.
+3. I setup a strategy to start a new VM upon failure of one of my cluster nodes.
+
+05/12/2013 (10h)
+1. Read about Nagios event handlers.
+2. Install VirtualBox guest additions on all virtual machines.
+3. Configure a shared directory between the virtual machines and the VirtualBox host.
+4. Setup a custom event handler that is triggered whenever 'node1' experiences a system failure (kernel panic).
+5. Make the controller start a new virtual machine when 'node1' fails, using VirtualBox command line tools. 
+6. Record a movie of the final Nagios setup.
+7. Write all steps of 04/12 and 05/12 down in the report.
+8. Read about Ganglia.
+9. Install Ganglia using a unicast setup.
+10. Test the Ganglia setup.
+11. Extract data from Ganglia's round-robin database.
+12. Write all steps concerning the installation of Ganglia down in the report.
+13. Formulate conclusion and remarks about my Nagios/Ganglia experiments.
+13. Read about installing HAProxy.
+
+In total I spend 12 hours (as I estimated in my previous SITREP).
+I did not finish the installation of HAProxy, but I already read quite a bit about it, so I hope to finish this quickly in my next session.
+
+2. What will I do in the next period.
+I plan to spend between 12-16 hours in the next 2 weeks.
+I will install HAProxy and make it distribute its connection over 2 nodes (based on the least-conn configuration).
+I will try to perform the following data storage related tasks:
+- setup a MySQL instance with master/slave replication
+- setup disk storage replication with DRBD
+- start setting up an instance of the Ceph distributed file system (over 2 different virtual machines)
+
+3. Problems.
+It took me quite some time to properly configure Nagios' event handler, the output (errors) of the scripts that are executed by the event handler do not end up in the Nagios log file.
+
+4. Open issues.
+At this moment there are no open issues.
+
+5. Assistance
+At this moment no assistance is required.
+
+6. Other urgent matters
+None.
+
+Kind regards,
+
+Pieter Libin
+Working student "Master in Applied Informatics"
