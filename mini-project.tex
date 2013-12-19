@@ -1174,6 +1174,108 @@ password) in the configuration file; you should use the $CHANGE
 MASTER ...$ SQL command.
 
 \section{Software disk replication experiment}
+I will setup a network RAID-1 (mirroring; appendix: explain RAID-1)
+system on 2 nodes, for this I will use the software DRBD 
+(Distributed Replicated Block Device) \cite{drbd_soft:2013}.
+I will create a disk (virtual machine disk) of 1GB on my virtual
+machines 'node1' and 'node2' (since we're using RAID, it is vital that
+these disks have the exact same size).
+
+reference: 
+http://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-ubuntu-11.10-p2
+\cite{drbd_ubuntu_doc}
+\cite{drbd_official_doc}
+
+\section{Adding the ``disks''}
+Firstly, I will add a disk to my virtual machines 'node1' and
+'node2'. This can be done via the VirtualBox user interface, when the
+virtual machines are powered off \ref{fig:add_disk_vbox}.
+
+\begin{figure}[h!]
+  \caption{Added a disk to one of the virtual machines}
+  \label{fig:add_disk_vbox}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/add_disk_vbox.png}
+\end{figure}
+
+\section{Setting up the network RAID-1}
+To ensure the synchronization is timed well, I will install the NTP
+(see appendix) packages.
+\begin{lstlisting}[language=bash]
+sudo apt-get install ntp ntpdate
+\end{lstlisting}
+
+We added a disk to the virtual machine, however, this disk is
+currently an unpartioned and unformatted device.
+Let's first have a look at our device:
+\begin{lstlisting}[language=bash]
+sudo fdisk -l /dev/sdb
+\end{lstlisting}
+This command show the following report:
+\begin{lstlisting}[language=bash]
+out/fdisk-l.txt
+\end{lstlisting}
+To create a partion:
+\begin{lstlisting}[language=bash]
+sudo fdisk /dev/sdb
+Command (m for help): n #create a new partition
+Select (default p): p #primary parition
+Partition number (1-4, default 1): 1
+First sector (2048-2097151, default 2048): 2048
+Last sector (2048-2097151, default 2097151): 2097151
+\end{lstlisting}
+The partition is created, but we still need to write the partition
+table to the disk:
+\begin{lstlisting}[language=bash]
+Command (m for help): w #write the partition table to disk
+\end{lstlisting}
+When running $fdisk -l$ again, we get this output:
+\begin{lstlisting}[language=bash]
+out/fdisk-l-2.txt
+\end{lstlisting}
+
+Now we need to install the DRBD utilities:
+\begin{lstlisting}[language=bash]
+sudo apt-get install drbd8-utils
+\end{lstlisting}
+And load the DRBD kernel module:
+\begin{lstlisting}[language=bash]
+sudo modprobe drbd
+\end{lstlisting}
+
+We can configure these nodes with the following configuration file
+\cite{drbd_ubuntu_doc} \cite{drbd_official_doc}:
+\begin{lstlisting}[language=bash]
+resource r0 {
+	net {
+                #one of the 3 possible protocols: A, B, C
+		protocol C;
+                #specifies the HMAC algorithm (see Appendix)
+                #to enable peer authentication
+		cram-hmac-alg sha1;
+                #secret used in peer authentication
+		shared-secret "testing";
+	}
+	on node1 {
+		volume 0 {
+			device    minor 1;
+			disk      /dev/sdb1;
+			meta-disk internal;
+		}
+		address   192.168.15.4:7789;
+	}
+	on node2 {
+		volume 0 {
+			device    minor 1;
+			disk      /dev/sdb1;
+			meta-disk internal;
+		}
+		address   192.168.15.8:7789;
+	}
+}
+\end{lstlisting}
+The node1 and node2 configuration elements are straightforward, I commented the
+other elements to clarify their meaning.
 
 
 \section{Distributed file systems}
@@ -1197,7 +1299,10 @@ was used)
 Round robin database
 ACID
 RAID
+RAID-1
 delta encoding
+NTP
+HMAC
 \end{appendices}
 
 %----------------------------------------------------------------------------------------
