@@ -280,6 +280,12 @@ master database, it is applied to the database and appended to the log. The stat
 in this log are than propagated to the slave databases.
 Most database systems support this replication strategy (Postgres \cite{postgres_db:2013},
 MySQL \cite{mysql_db:2013}, ...).
+Mention uses:
+- backup of database
+- use a slave database without causing load on the master (statistics
+for example)
+- scale out: for read only access, let a proxy determine which slave
+needs to be used
 
 \paragraph*{Multi-master replication}
 In this setup, multiple master instances exists, each of these master
@@ -1002,8 +1008,151 @@ The installation went smoothly on Ubuntu, some manual configurations
 were necessary, but since the documentation of the project is clear
 and up-to-date, this did not cause any problems.
 
+\section{Database replication experiment}
+I will setup a master-slave replicated MySQL database. I will use the
+'haproxy' virtual machine to act as my master database and I will
+install 2 slave databases on my 'node1' and 'node2' virtual machines.
+cite : official documentation +
+http://www.howtoforge.com/mysql_database_replication  + 
+http://dba.stackexchange.com/questions/8680/what-is-the-best-way-to-create-mysql-master-slave-replication-setup-and-troubles
 
-\section{Distributed file systems}
+\subsection{Installation} 
+I will start by installing mysql (server and client) on all the involved virtual
+machines ('haproxy','node1','node2').
+\begin{lstlisting}[language=bash]
+sudo apt-get install mysql-server mysql-client
+\end{lstlisting}
+
+Let's create a test database on our master-node:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> CREATE DATABASE ossec;
+\end{lstlisting}
+No we can use this database, and create a simple table in it:
+\begin{lstlisting}[language=bash]
+mysql> USE ossec;
+mysql> CREATE TABLE friend (first_name text, last_name text);
+\end{lstlisting}
+And we add a friend to it:
+\begin{lstlisting}[language=bash]
+mysql> INSERT INTO friend (first_name, last_name) values ('Eric',
+'Northman');
+\end{lstlisting}
+
+The next step is the configuration of the master. Most of the
+configuration is done in $/etc/mysql/my.cnf$.
+First we need to comment out the bind-address line, this will inform MySQL
+to listen on all IP addresses rather than only on localhost:
+\begin{lstlisting}[language=bash]
+#bind-address        = 127.0.0.1
+\end{lstlisting}
+MySQL slaves use the logs that a master-node generates to replicate
+the database. In order to make this work, we need to tell the MySQL
+master-node where to
+generate these log files and for which databases the log files need to
+be generated. 
+\begin{lstlisting}[language=bash]
+log-bin = /var/log/mysql/bin.log
+#multiple binlog-do-db lines are allowed
+binlog-do-db = ossec
+\end{lstlisting}
+We need to specify the server's id as well, since this is our master
+server, we use $id=1$:
+\begin{lstlisting}[language=bash]
+server-id = 1
+\end{lstlisting}
+Now we're ready for restarting the database:
+\begin{lstlisting}[language=bash]
+sudo /etc/init.d/mysql restart
+\end{lstlisting}
+We need to give a MySQL user (let call him 'reppy') the permission to replicate our
+database:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> GRANT REPLICATIOn SLAVE ON *.* TO 'reppy'@''%' IDENTIFIED BY
+                                %'reppy_password';
+mysql> FLUSH PRIVILEGES;
+\end{lstlisting}
+wat doet die percent in de sql code hierboven?
+
+To get the information to configure the slave, we need to execute these
+commands to select our database 'ossec' and lock all the tables in it:
+\begin{lstlisting}[language=bash]
+mysql> USE ossec;
+mysql> FLUSH TABLES WITH READ LOCK;
+\end{lstlisting}
+No we can extract the information we need:
+\begin{lstlisting}[language=bash]
+mysql> SHOW MASTER STATUS;
+\end{lstlisting}
+The output of this command is:
+\begin{lstlisting}[language=bash]
++---------------+----------+--------------+------------------+
+| File          | Position | Binlog_do_db | Binlog_ignore_db |
++---------------+----------+--------------+------------------+
+| bin.000003    | 333      | ossec        |                  |
++---------------+----------+--------------+------------------+
+1 row in set (0.00 sec)
+\end{lstlisting}
+Now we need to dump the current database:
+\begin{lstlisting}[language=bash]
+mysqldump -u root -p --opt ossec > ossec.sql
+\end{lstlisting}
+
+It is important to unlock the tables again before we continue:
+\begin{lstlisting}[language=bash]
+mysql> UNLOCK TABLES;
+\end{lstlisting}
+
+Now let's configure the slaves, we start by creating the 'ossec'
+database on the slaves:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> CREATE DATABASE ossec;
+\end{lstlisting}
+Now we need to apply the dump we obtained on the master server (I
+copied the ossec.sql using $scp$):
+\begin{lstlisting}[language=bash]
+mysql -u root -p ossec < ossec.sql
+*type password*
+\end{lstlisting}
+
+Next we configure the server-id and the database that is replicated in
+$/etc/mysql/my.cnf$:
+\begin{lstlisting}[language=bash]
+#node 1
+server-id = 2 
+#node 2
+server-id = 3
+
+#same for node 1 and 2
+replicate-do-db = ossec
+\end{lstlisting}
+
+After these configurations, we need to restart the MySQL server:
+\begin{lstlisting}[language=bash]
+sudo /etc/init.d/mysql restart
+\end{lstlisting}
+
+And execute this SQL to let the slave know where to find its master:
+\begin{lstlisting}[language=bash]
+mysql> CHANGE MASTER TO MASTER_LOG_FILE='bin.000003',
+MASTER_LOG_POS=333, MASTER_HOST='192.168.15.10', MASTER_USER='reppy', MASTER_PASSWORD='reppy_password';
+\end{lstlisting}
+Now we can start the slave:
+\begin{lstlisting}[language=bash]
+mysql> START SLAVE;
+\end{lstlisting}
+
+After this, when a change is made to the master database, these
+changes are automatically propagated to the slave databases. I
+recorded a video to demonstrate this with my test setup (reference mysql_replication.mov).
+
+
+\subsection{Distributed file systems}
 
 ceph or glusterfs: seems to be pretty much the same, ceph backed by
 ubuntu, maybe easier to  configure on ubuntu?
