@@ -31,12 +31,13 @@ In total I spend 12 hours.
 I did not finish the DRBD experiment, but I already have gotten quite far, so I hope to finish this quickly in my next session.
 
 2. What will I do in the next period.
-I plan to spend between 22-33 hours (depending whether I can finish a deadline for another course that is pending) in the next 2 weeks.
+I plan to spend 22 hours in the next 2 weeks.
 - I will finish my DRBD experiment.
 - I will start setting up an instance of the Ceph distributed file system (over 2 different virtual machines)
-- If I can spend 33 hours in stead of 22 hours; I will implement a MySQL shard.
+- I will implement a MySQL shard.
 
 3. Problems.
+More a remark than a problem: in my HAProxy installation I used the round-robin algorithm in stead of the least-conn algorithm as I mentioned before, since I discovered that the last is more suited for HTTP (and other protocols with relatively short session times).
 The installation of MySQL replication was quite involved and I had to consult quite some documentation sources; in the end I got this working without too many problems.
 
 4. Open issues.
