@@ -206,6 +206,7 @@ functioning, the monitoring server can decide to restart the server application,
 is responsible for the problems.
 
 \subsection{Load balancing proxies}
+\label{sec:load_balancing_proxies}
 Load balancing is a method for distributing workloads across multiple
 computing nodes. It can be used to improve the reliabilty of a system through
 redundancy and to provide scalability by sending requests the most
@@ -484,7 +485,7 @@ I first enabled the UFW firewall:
 \end{lstlisting} 
 Then I opened port 80:
 \begin{lstlisting}[language=bash]
-  sudo ufw allow tcp/80
+  sudo ufw allow 80/tcp
 \end{lstlisting} 
 Since the NAT network setup does only allow virtual machines to access
 other virtual machines, I started my Windows virtual machine and used
@@ -884,6 +885,123 @@ neg:
 ?
 
 both systems very interesting and mostly complementary
+
+\section{HAProxy experiment}
+HAProxy is a prominent software load balancer. It acts like a reverse
+proxy; pretending it is the main server and then forwarding the
+requests to one of the HTTP server cluster nodes.
+Several strategies are available to distribute requests over a HTTP
+server cluster; these strategies are explained in
+\ref{sec:load_balancing_proxies}.
+In this experiment, I will setup a HAProxy that sends requests to 2
+HTTP server cluster nodes using the 'roundrobin' distribution
+strategy.
+\subsection{HAProxy installation}
+I will install HAProxy on a new Ubuntu virtual machine: 'haproxy'.
+I will use the virtual machines 'node1' and 'node2' as HTTP server cluster nodes.
+Let's start by properly configuring 'node1' and 'node2' that it can
+serve this simple PHP program (from \cite{haproxy_install_tutorial}):
+\label{lst:test_php}
+\begin{lstlisting}[language=php]
+<?php
+header('Content-Type: text/plain');
+echo "Server IP: ".$_SERVER['SERVER_ADDR'];
+echo "\nClient IP: ".$_SERVER['REMOTE_ADDR'];
+echo "\nX-Forwarded-for: ".$_SERVER['HTTP_X_FORWARDED_FOR'];
+?>
+\end{lstlisting} 
+This program will print the HTTP server's IP address, the client IP
+address (which in our case will be the IP address of our HAProxy
+server) and the X-Forwarded-for header (which will allow us to identify
+the originating IP adress: i.e. the IP-address of our browser).
+First we'll need to install Apache and PHP:
+\begin{lstlisting}[language=bash]
+sudo apt-get install apache2
+sudo apt-get install php5
+sudo apt-get install libapache2-mod-php5
+sudo /etc/init.d/apache2 restart
+\end{lstlisting} 
+Now we can copy our test program \ref{lst:test_php} to
+$/var/www/test.php$.
+
+Then I opened port 80:
+\begin{lstlisting}[language=bash]
+  sudo ufw allow 80/tcp
+\end{lstlisting} 
+
+After these changes, the nodes were able to serve this PHP test
+program: \ref{fig:test_php_working}.
+
+\begin{figure}[h!]
+  \caption{Test PHP program working in a browser}
+  \label{fig:test_php_working}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/test_php_working.png}
+\end{figure}
+
+To install HAProxy:
+\begin{lstlisting}[language=bash]
+apt-get install haproxy
+\end{lstlisting} 
+After this installation, a reboot of the virtual machine was required.
+In order to make HAProxy start by the init script we need to put the
+ENABLED variable in $/ect/default/haproxy$ to $1$.
+I use the HAProxy config file that is installed with the haproxy
+Ubuntu package comes with a proper config file by default (reference appendix src/haproxy_basic.cfg).   
+In order to configure HAProxy for a specific application, I conceived
+this configuration snippet:
+\begin{lstlisting}[language=bash]
+listen ossec_app 0.0.0.0:80
+        mode http
+        balance roundrobin
+        option forwardfor
+        server node1 192.168.15.4:80 check
+        server node2 192.168.15.8:80 check
+\end{lstlisting} 
+This configuration defines the application ossec_app on port 80.
+I use the 'roundrobin' algorithm, enabled the forwardfor (so we can read
+the X-Forwarded-for HTTP header in our PHP test program) and added our 2
+HTTP server cluster nodes to the configuration.
+Then I opened port 80 on the 'haproxy' server:
+\begin{lstlisting}[language=bash]
+  sudo ufw allow 80/tcp
+\end{lstlisting} 
+
+\subsection{HAProxy testing}
+After making the configurations as described in the previous section, I could visit the test PHP program via the
+haproxy server (IP address: 192.168.15.10); as demonstrated in \ref{fig:haproxy_working_browser}.
+
+\begin{figure}[h!]
+  \caption{Testing the haproxy setup in a browser}
+  \label{fig:haproxy_working_browser}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/haproxy_working_browser.png}
+\end{figure}
+
+When testing this setup, it becomes clear that HAProxy forwards the
+request to both cluster nodes (subsequently to 'node1' and than to
+'node2').
+I recorded a video to demonstrate this behaviour (reference to
+haproxy.mov).
+
+This setup also handles failure of nodes, if we shutdown apache on one
+of the nodes, HAProxy will automatically forward the incoming requests
+to the working node. 
+I recorded a video to demonstrate this behaviour (reference to
+haproxy-failover.mov).
+
+\subsection{Conclusion}
+I was able to extract a lot of valuable information from this online
+article: \cite{haproxy_install_tutorial}. The online documentation of
+ HAProxy \cite{haproxy:2013} is also very good, and explains all
+ configuration items in detail, often with some pointers on when an
+ how to use them. The documentation for example advices not to use the
+ 'leastconn' algorithm for HTTP services, since this algorithm is not
+ well-suited for services that use short-lived sessions.
+The installation went smoothly on Ubuntu, some manual configurations
+were necessary, but since the documentation of the project is clear
+and up-to-date, this did not cause any problems.
+
 
 \section{Distributed file systems}
 
