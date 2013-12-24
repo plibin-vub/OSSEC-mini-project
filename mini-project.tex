@@ -1186,7 +1186,7 @@ http://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-ubuntu-11.10-p2
 \cite{drbd_ubuntu_doc}
 \cite{drbd_official_doc}
 
-\section{Adding the ``disks''}
+\subsection{Adding the ``disks''}
 Firstly, I will add a disk to my virtual machines 'node1' and
 'node2'. This can be done via the VirtualBox user interface, when the
 virtual machines are powered off \ref{fig:add_disk_vbox}.
@@ -1198,12 +1198,16 @@ virtual machines are powered off \ref{fig:add_disk_vbox}.
     \includegraphics[width=0.5\textwidth]{pics/add_disk_vbox.png}
 \end{figure}
 
-\section{Setting up the network RAID-1}
+\subsection{Setting up the network RAID-1}
 To ensure the synchronization is timed well, I will install the NTP
 (see appendix) packages.
 \begin{lstlisting}[language=bash]
 sudo apt-get install ntp ntpdate
 \end{lstlisting}
+
+In order for DRBD to work, each node should be able to access the
+other node by name. Since we have no DNS in place, we need to
+configure this in the $/etc/hosts$ config file.
 
 We added a disk to the virtual machine, however, this disk is
 currently an unpartioned and unformatted device.
@@ -1244,38 +1248,80 @@ sudo modprobe drbd
 \end{lstlisting}
 
 We can configure these nodes with the following configuration file
-\cite{drbd_ubuntu_doc} \cite{drbd_official_doc}:
+(based on: \cite{drbd_ubuntu_doc} \cite{drbd_official_doc}):
 \begin{lstlisting}[language=bash]
-resource r0 {
-	net {
-                #one of the 3 possible protocols: A, B, C
-		protocol C;
-                #specifies the HMAC algorithm (see Appendix)
-                #to enable peer authentication
-		cram-hmac-alg sha1;
-                #secret used in peer authentication
-		shared-secret "testing";
-	}
-	on node1 {
-		volume 0 {
-			device    minor 1;
-			disk      /dev/sdb1;
-			meta-disk internal;
-		}
-		address   192.168.15.4:7789;
-	}
-	on node2 {
-		volume 0 {
-			device    minor 1;
-			disk      /dev/sdb1;
-			meta-disk internal;
-		}
-		address   192.168.15.8:7789;
-	}
-}
+src/drbd/drbd.conf
 \end{lstlisting}
-The node1 and node2 configuration elements are straightforward, I commented the
+Most of the configuration items are straightforward, I commented the
 other elements to clarify their meaning.
+The configuration file should be placed in $/etc/drbd.conf$.
+
+We need to open the ports 7789 on both nodes:
+\begin{lstlisting}[language=bash]
+sudo ufw allow 7789/tcp
+\end{lstlisting}
+
+We also need to restart the drbd daemon: 
+\begin{lstlisting}[language=bash]
+sudo /etc/init.d/drbd restart
+\end{lstlisting}
+
+First I started the daemon on 'node1', the daemon waited untill the
+daemon I brought the daemon on 'node2' online.
+I recorded a short video that demonstrates this: start_drbd.mov.
+
+\subsection{Conclusions and remarks}
+When starting the drdb service, you need to specify
+whether you want the software to send statistics (anonymized) to a
+server of the DRBD organization. -> not sure what to think about this
+To disable this, we need to add the line $usage-count no;$ to the config file's
+global section.
+
+Now we configured the mirrored device $/dev/drbd0$, but we can't use
+this device yet.
+We first need to initialize the meta data storage of each physical
+device,
+one both nodes, we need to run this command:
+\begin{lstlisting}[language=bash]
+sudo drbdadm create-md r0
+\end{lstlisting}
+We also need to decide which node will be the primary node; on this
+node we will be able to read and write data d.
+For now, I will make 'node1' the primary node for this device.
+First we need to invalidate the data on 'node2', so BRBD knows this
+data can safely be overriden; we use this command:
+\begin{lstlisting}[language=bash]
+sudo drbdadm invalidate r0
+\end{lstlisting}
+To make the device on 'node1' the primary divice,
+we need to run this command on 'node1':
+\begin{lstlisting}[language=bash]
+sudo drbdadm --force primary r0
+\end{lstlisting}
+Now the device on 'node1' gets automatically synched with the one on
+'node2'. But there doesn't exist a filesystem on our device yet; let's
+create an ext3-filesystem (this command is executed no 'node1'):
+\begin{lstlisting}[language=bash]
+sudo mkfs.ext3 /dev/drbd0
+\end{lstlisting}
+Now we can mount the filesystem (on 'node1'):
+\begin{lstlisting}[language=bash]
+sudo mkdir /media/drdb0
+sudo mount /dev/drbd0 /media/drbd0 
+\end{lstlisting}
+To test that the replication actually works, we need to:
+\begin{itemize}
+\item create some files on $/media/drbd0$ on 'node1'
+\item unmount the $/media/drbd0$ on 'node1'
+\item make 'node1' the secondary host
+\item make 'node2' the primary host
+\item mount the device on 'node2'
+\item check that the files we placed on the device from 'node1' also
+  appear on 'node2'
+\end{itemize}
+I created a video to demonstrate and test this scenario:
+test_drbd.mov.
+
 
 
 \section{Distributed file systems}
