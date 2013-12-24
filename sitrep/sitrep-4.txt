@@ -34,10 +34,10 @@ I did not finish the DRBD experiment, but I already have gotten quite far, so I 
 I plan to spend 22 hours in the next 2 weeks.
 - I will finish my DRBD experiment.
 - I will start setting up an instance of the Ceph distributed file system (over 2 different virtual machines)
-- I will implement a MySQL shard.
+- I will implement a MySQL shard (over 2 nodes).
 
 3. Problems.
-More a remark than a problem: in my HAProxy installation I used the round-robin algorithm in stead of the least-conn algorithm as I mentioned before, since I discovered that the last is more suited for HTTP (and other protocols with relatively short session times).
+More a remark than a problem: in my HAProxy installation I used the round-robin algorithm in stead of the least-conn algorithm as I mentioned before, since I discovered that the round-robin algorithm is more suited for HTTP (and other protocols with relatively short session times).
 The installation of MySQL replication was quite involved and I had to consult quite some documentation sources; in the end I got this working without too many problems.
 
 4. Open issues.
