@@ -1331,12 +1331,231 @@ The online documentation on how to configure the software is
 up-to-date and helpful. It is a nice and interesting software, that easily allows you
 to setup replication between datacenters on blocklevel.
 
+\section{Distributed file system experiment}
+I will experiment with Ceph, since this seems to be the de-facto
+standard distributed filesystem in the Ubutu landscape.
+Except for better compatibility with Ubuntu, there is no real reason
+to choose Ceph over GlusterFS; both seem to be decent projects
+\cite{ceph_vs_gluster_1}, \cite{ceph_vs_gluster_debate}.
+Ceph is a large project, with many features: object storage, file
+system, block device layer, ... In this experiment, I will focus on
+the distributed file system component.
 
+\subsection{Architecture}
+\label{subsec:ceph_architecture}
+Discuss architecture: 
+\begin{itemize}
+\item developerWorks article (printed):
+  http://www.ibm.com/developerworks/library/l-ceph/
+\item http://www.anchor.com.au/wp-content/uploads/2012/09/ceph\_stack.png
+\end{itemize}
 
-\section{Distributed file systems}
+\subsection{Installation}
+Ceph can be installed in 2 ways: via ceph-deploy (as piece of software
+that is installed on an administrator node that automatically installs the
+necessary components on the nodes in your Ceph cluster) and a
+manual installation.
+The advantages of the first approach:
+\begin{itemize}
+\item quicker to setup
+\item commands entered on the administrative node are 
+  propagated to all relevant cluster nodes (this makes upgrading nodes
+  much easier)
+\end{itemize}
+The main advantage of a manual installation is that it allows you to
+fully control where and when all necessary components are installed on the different
+nodes. 
+This might be interesting on a production cluster, however I think the
+installation via ceph-deploy is more appropriate for this experiment, since it will
+allow me to test more of Ceph's features in a shorter timespan.
 
+\subsubsection{Nodes}
+We will first setup a cluster with 1 administrator node and a Ceph
+Storage Cluster consisting of 3 cluster nodes (this setting is adviced
+by the official documentation to experiment with the software \cite{ceph_official_doc}).
+For this, I create 4 new clones of my base virtual machine:
+'ceph-admin', 'ceph-node1', 'ceph-node2', 'ceph-node3'.
+
+\subsubsection{Preparation of the cluster nodes}
+Ceph requires some basic stuff to be in place, in order to be able to
+use ceph-deploy to configure the cluster and cluster nodes.
+The instructions are well documented in the official documentation's
+``Ceph node setup'' section \cite{ceph_official_doc}.
+A quick overview of the different steps:
+\begin{itemize}
+\item create a 'ceph' user on each node
+\item add root privileges to the 'ceph' user
+\item install an ssh server
+\item configure the admin node so that it can access the cluster nodes
+  without using a password (using SSH keys)
+\item all nodes should be able to access each other using hostname
+  resolution, in my case, we had to update the $/etc/hosts$ file to
+  make this possible, since we have no DNS server in our lab setting
+\end{itemize}
+
+\subsubsection{Configuring the ceph-admin node}
+The documentation requests to add the ceph-deploy package to your
+local APT
+repository, however on Ubuntu 13.10, this package was already
+available by default.
+So we can install it like this:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ceph-deploy
+\end{lstlisting}
+We also need to create a directory to maintain the configuration of
+our cluster (the name is not important, but we will use
+~/ossec-cluster consistently through the example for clarity):
+\begin{lstlisting}[language=bash]
+mkdir ~/ossec-cluster
+\end{lstlisting}
+It is important that we run  the ceph-deploy command in this
+directory, since it will export its output to the current directory.
+
+\subsubsection{Setting up the cluster}
+Now we can start configuring our cluster \footnote{The following steps are executed on the 'ceph-admin'}.
+We will configure 'ceph-node1' as a monitor node, 'ceph-node2' and
+'ceph-node-3' will be object storage daemons \ref{subsec:ceph_architecture}.
+
+cite ceph documentation
+
+To start a new cluster with monitor node 'ceph-node1':
+\begin{lstlisting}[language=bash]
+cd ~/ossec-cluster
+ceph-deploy new ceph-node1
+\end{lstlisting}
+After executing these commands, a set of files will be created in
+~/ossec-cluster.
+To install ceph on our nodes:
+\begin{lstlisting}[language=bash]
+ceph-deploy install ceph-node1 ceph-node2 ceph-node3
+\end{lstlisting}
+Every Ceph cluster is required to have at least one monitor
+\footnote{Multiple monitor nodes are also supported; this is vital for a high
+  availability production cluster, but outside the scope of this experiment} :
+\begin{lstlisting}[language=bash]
+ceph-deploy mon create ceph-node1
+\end{lstlisting}
+To be able to add Object Storage Daemons, we need to gather the
+monitor node's
+keys:
+\begin{lstlisting}[language=bash]
+ceph-deploy gatherkeys ceph-node1
+\end{lstlisting}
+To add the Object Storage Daemons (OSDs), we first need to make a uniquely
+named directory on the nodes. I created /opt/OSD-disk0 on ceph-node2 and
+/opt/OSD-disk1 on ceph-node3. 
+Now we can prepare and activate the OSDs:
+\begin{lstlisting}[language=bash]
+ceph-deploy osd prepare ceph-node2:/opt/OSD-disk0 ceph-node3:/opt/OSD-disk1
+ceph-deploy osd activate ceph-node2:/opt/OSD-disk0 ceph-node3:/opt/OSD-disk1
+\end{lstlisting}
+
+In order to use the ceph command line tool without the need to specify
+the monitor address, we need to copy the configuration and admin key
+to all nodes.
+This goes as advertised in the documentation for the cluster nodes:
+\begin{lstlisting}[language=bash]
+ceph-deploy admin ceph-node1 ceph-node2 ceph-node3 
+\end{lstlisting}
+However, this does not work for the administrator node; apparently
+this is caused by a bug \cite{ceph_bug_1} that results in the fact
+that no config file is written to /etc/ceph.
+We can circomvent this problem by first copying the config files that
+reside in ~/ossec-cluster to /etc/ceph and than running ``ceph-deploy
+admin''.
+In order to make sure the correct config file is written to /etc/ceph,
+we need to specify the option ``--overwrite-conf''.
+This full set of commands:
+\begin{lstlisting}[language=bash]
+sudo cp -R ~/ossec-cluster /etc/ceph
+ceph-deploy admin --overwrite-conf ceph-admin
+\end{lstlisting}
+
+\subsubsection{Testing our cluster}
+Now, we have setup the cluster properly, we can control the cluster
+with the ``ceph'' command, to install this command run: 
+\begin{lstlisting}[language=bash]
+sudo apt-get install ceph-common
+\end{lstlisting}
+First let's check the status of our cluster:
+\begin{lstlisting}[language=bash]
+ceph health
+\end{lstlisting}
+Executing this command should return ``HEALTH_OK''.
+To store and retrieve an object to our cluster, we can do this with
+the rados tool \ref{subsec:ceph_architecture}. This tool allows us to
+read/write objects respectively from/to a pool.
+Pools can be created and removed with the rados tool, when setting up
+the cluster, three pools are created automatically: data, metadata,
+rbd.
+To store a file to the default data pool, we can use the following
+commands:
+\begin{lstlisting}[language=bash]
+echo "Dear Diary, today I played with Ceph..." > diary.txt
+rados put diary-text-obj diary.txt --pool=data
+\end{lstlisting}
+To view what is in the data pool, we can use this command:
+\begin{lstlisting}[language=bash]
+rados --pool=data ls
+\end{lstlisting}
+We can also request the ``physical'' location of our file, the
+so-called placement group \ref{subsec:ceph_architecture}:
+\begin{lstlisting}[language=bash]
+ceph osd map data diary-text-obj
+\end{lstlisting}
+Note that this location may change as our cluster's design changes
+(OSD's that are added, or removed).
+To get our precious diary back:
+\begin{lstlisting}[language=bash]
+rados get diary-text-obj -o diary.txt --pool=data
+\end{lstlisting}
+I recorded a video that demonstrates these commands: ceph\_test.mov
+
+\subsubsection{Adding OSDs on the fly}
+It is possible to add OSDs on the fly, to increase capacity for
+example. When an OSD is added the cluster will automatically be
+rebalanced.
+Adding OSDs is done in the same way as I approached earlier,
+to add a OSD on 'ceph-node1' we need to execute this code:
+\begin{lstlisting}[language=bash]
+ceph-deploy osd prepare ceph-node1:/opt/OSD-disk2
+ceph-deploy osd activate ceph-node1:/opt/OSD-disk2
+\end{lstlisting}
+
+\subsubsection{Setting up the Ceph FileSystem}
+In order to setup the file system ... need to install something
+more...
+simply goes on top of the Cluster Storage system
+
+\subsection{Conclusion and remarks}
 ceph or glusterfs: seems to be pretty much the same, ceph backed by
 ubuntu, maybe easier to  configure on ubuntu?
+security: root ceph user???
+ceph-deploy install -> works very well, quite impressive
+Because of the bug I ran into \cite{ceph_bug_1}, I had to redo the
+installation quite a few time, to figure out a solution for the
+problem.
+It is good to now that you can undo all installation residues with the
+following commands:
+\begin{lstlisting}[language=bash]
+sudo cp -R ~/ossec-cluster /etc/ceph
+ceph-deploy purge ceph-admin ceph-node1 ceph-node2 ceph-node3
+ceph-deploy purgedata ceph-admin ceph-node1 ceph-node2 ceph-node3
+ceph-deploy forgetkeys ceph-admin ceph-node1 ceph-node2 ceph-node3
+\end{lstlisting}
+Note that the purge command is not mentioned in the documentation, but
+this seems to be important as well!
+Of course it would be nice that the installation procedure did not have any bug
+at all; however knowing that you can safely screw thing up and return to a
+clean slate, is quite comforting.
+Very powerfull software
+remarkably easy to setup
+clean architecture (different layers)
+able to configure what is important, redundance, speed to read/write 
+possibility to make snapshots
+Although this software does a lot of things (nicely seperate libraries
+per layer), since it is open source software, it is still possible to
+review what is going on.
 
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
