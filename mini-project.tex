@@ -1268,6 +1268,7 @@ sudo /etc/init.d/drbd restart
 
 First I started the daemon on 'node1', the daemon waited untill the
 daemon I brought the daemon on 'node2' online.
+
 \subsection{Conclusions and remarks}
 When starting the drdb service, you need to specify
 whether you want the software to send statistics (anonymized) to a
@@ -1482,6 +1483,10 @@ First let's check the status of our cluster:
 ceph health
 \end{lstlisting}
 Executing this command should return ``HEALTH_OK''.
+
+I recorded a short video that shows the different cluster nodes and
+lists the monitor and OSD nodes using the 'ceph' command: ceph_cluster.mov.
+
 To store and retrieve an object to our cluster, we can do this with
 the rados tool \ref{subsec:ceph_architecture}. This tool allows us to
 read/write objects respectively from/to a pool.
