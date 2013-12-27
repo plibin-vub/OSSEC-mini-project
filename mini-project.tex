@@ -953,7 +953,7 @@ After this installation, a reboot of the virtual machine was required.
 In order to make HAProxy start by the init script we need to put the
 ENABLED variable in $/ect/default/haproxy$ to $1$.
 I use the HAProxy config file that is installed with the haproxy
-Ubuntu package comes with a proper config file by default (reference appendix src/haproxy_basic.cfg).   
+Ubuntu package comes with a proper config file by default (reference appendix src/haproxy\_basic.cfg).   
 In order to configure HAProxy for a specific application, I conceived
 this configuration snippet:
 \begin{lstlisting}[language=bash]
@@ -964,7 +964,7 @@ listen ossec_app 0.0.0.0:80
         server node1 192.168.15.4:80 check
         server node2 192.168.15.8:80 check
 \end{lstlisting} 
-This configuration defines the application ossec_app on port 80.
+This configuration defines the application ossec\_app on port 80.
 I use the 'roundrobin' algorithm, enabled the forwardfor (so we can read
 the X-Forwarded-for HTTP header in our PHP test program) and added our 2
 HTTP server cluster nodes to the configuration.
@@ -1012,9 +1012,9 @@ and up-to-date, this did not cause any problems.
 I will setup a master-slave replicated MySQL database. I will use the
 'haproxy' virtual machine to act as my master database and I will
 install 2 slave databases on my 'node1' and 'node2' virtual machines.
-cite : official documentation +
-http://www.howtoforge.com/mysql_database_replication  + 
-http://dba.stackexchange.com/questions/8680/what-is-the-best-way-to-create-mysql-master-slave-replication-setup-and-troubles
+\cite{mysql_official_replication_doc},
+\cite{mysql_replication_howtoforge}, 
+\cite{mysql_replication_stackexchange}, 
 
 \subsection{Installation} 
 I will start by installing mysql (server and client) on all the involved virtual
@@ -1157,7 +1157,7 @@ mysql> START SLAVE;
 After this, when a change is made to the master database, these
 changes are automatically propagated to the slave databases. I
 recorded a video to demonstrate this with my test setup (reference
-mysql_replication.mov).
+mysql\_replication.mov).
 
 \subsection{Conclusion and remarks}
 Setting up a replicated MySQL environment was not easy, mainly since I
@@ -1169,7 +1169,7 @@ Ubuntu.
 On the other hand, if something went wrong or behaved unexpectedly,
 the output in the log files was quite informative. 
 One important remark is that on a slave node, it is no longer possible
-to configure the master settings (host, log_pos, log_file, user,
+to configure the master settings (host, log\_pos, log\_file, user,
 password) in the configuration file; you should use the $CHANGE
 MASTER ...$ SQL command.
 
