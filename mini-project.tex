@@ -1268,14 +1268,13 @@ sudo /etc/init.d/drbd restart
 
 First I started the daemon on 'node1', the daemon waited untill the
 daemon I brought the daemon on 'node2' online.
-I recorded a short video that demonstrates this: start_drbd.mov.
-
 \subsection{Conclusions and remarks}
 When starting the drdb service, you need to specify
 whether you want the software to send statistics (anonymized) to a
 server of the DRBD organization. -> not sure what to think about this
 To disable this, we need to add the line $usage-count no;$ to the config file's
 global section.
+I recorded a short video that demonstrates this: start\_drbd.mov.
 
 Now we configured the mirrored device $/dev/drbd0$, but we can't use
 this device yet.
@@ -1320,7 +1319,7 @@ To test that the replication actually works, we need to:
   appear on 'node2'
 \end{itemize}
 I created a video to demonstrate and test this scenario:
-test_drbd.mov.
+test\_drbd.mov.
 
 
 
