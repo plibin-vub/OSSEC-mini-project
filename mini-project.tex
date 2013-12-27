@@ -1321,6 +1321,16 @@ To test that the replication actually works, we need to:
 I created a video to demonstrate and test this scenario:
 test\_drbd.mov.
 
+\subsection{Conclusions and remarks}
+When starting the drdb service, you need to specify
+whether you want the software to send statistics (anonymized) to a
+server of the DRBD organization. -> not sure what to think about this
+To disable this, we need to add the line $usage-count no;$ to the config file's
+global section.
+The online documentation on how to configure the software is
+up-to-date and helpful. It is a nice and interesting software, that easily allows you
+to setup replication between datacenters on blocklevel.
+
 
 
 \section{Distributed file systems}
