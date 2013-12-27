@@ -1562,6 +1562,22 @@ Although this software does a lot of things (nicely seperate libraries
 per layer), since it is open source software, it is still possible to
 review what is going on.
 
+\section{Database Shards}
+Hortizontal scaling in RDBMs is quite involved, their are different
+aspects to it; managing shards, propagating queries to shards,
+inserting data into new shards.
+I did some reseach into existing solutions for MySQL and Postgres, but
+I was not able to find a solution that properly covers all the
+aforementioned aspects and that would fit in the scope of this
+experiment.
+Some of the solutions that I picked up that looked quite interesting:
+\begin{itemize}
+\item vitesse cite
+\item cubrid
+\item MySQL NDB cluster
+\item pgPool
+\end{itemize}
+
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
 17-18 (printed)
