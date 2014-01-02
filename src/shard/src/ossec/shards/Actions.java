@@ -16,7 +16,7 @@ public class Actions {
 		try {
 			String sql = "INSERT INTO user (name) VALUES (?)";
 			PreparedStatement s = createConnection(targetShard).prepareStatement(sql);
-			s.setString(0, name);
+			s.setString(1, name);
 			s.execute();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
