@@ -31,8 +31,8 @@ public class Actions {
 		try {
 			String sql = "INSERT INTO post (name, message) VALUES (?,?)";
 			PreparedStatement s = createConnection(targetShard).prepareStatement(sql);
-			s.setString(0, name);
-			s.setString(1, message);
+			s.setString(1, name);
+			s.setString(2, message);
 			s.execute();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -57,7 +57,7 @@ public class Actions {
 		try {
 			String sql = "SELECT * FROM post WHERE message LIKE ?";
 			PreparedStatement s = createConnection(shard).prepareStatement(sql);
-			s.setString(0, "%" + pattern + "%");
+			s.setString(1, "%" + pattern + "%");
 			ResultSet rs = s.executeQuery();
 			while(rs.next()) {
 				String user = rs.getString("name");
@@ -80,7 +80,7 @@ public class Actions {
 		try {
 			String sql = "SELECT * FROM post WHERE name = ?";
 			PreparedStatement s = createConnection(targetShard).prepareStatement(sql);
-			s.setString(0, name);
+			s.setString(1, name);
 			ResultSet rs = s.executeQuery();
 			while(rs.next()) {
 				String message = rs.getString("message");
