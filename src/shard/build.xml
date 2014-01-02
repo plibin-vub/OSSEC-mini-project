@@ -1,0 +1,49 @@
+<project name="shards" default="all" basedir=".">
+  <property name="proj.name" value="shards"/>
+
+  <!-- Global properties for this build -->
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="build"/>
+  <property name="dist.dir" value="dist"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="bin.dir" value="bin"/>
+
+  <!-- Classpath declaration -->
+  <path id="project.classpath">
+    <fileset dir="." />
+  </path>
+
+  <target name="all" depends="dist">
+  </target>
+  
+  <!-- Clean up -->
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dist.dir}"/>
+    <delete dir="${bin.dir}"/>
+  </target>
+
+  <!-- Compile Java source -->
+  <target name="build">
+    <mkdir dir="${build.dir}"/>
+    
+    <javac
+       srcdir="${src.dir}"
+       destdir="${build.dir}"
+       debug="on"
+       source="1.5"
+       target="1.5">
+      <classpath refid="project.classpath"/>
+    </javac>
+  </target>
+
+  <target name="dist" depends="build">
+    <mkdir dir="${dist.dir}"/>
+    <jar jarfile="${dist.dir}/shard-test.jar" basedir="${build.dir}">
+       <manifest>
+         <attribute name="Main-Class" value="ossec.shards.Commands"/>
+         <attribute name="Class-Path" value="../lib/mysql-connector-java-5.1.28-bin.jar"/>
+       </manifest>
+     </jar>
+  </target>
+</project>
