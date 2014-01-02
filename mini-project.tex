@@ -387,6 +387,7 @@ private to a user (storage of emails, storage of Skype contacts, ...),
 Both MySQL \cite{mysql_db:2013} and Postgres \cite{postgres_db:2013}
 support database sharding.
 \section{Document-oriented NoSQL databases}
+\label{sec:no_sql}
 When the data that is stored is private to one user and performing
 queries over multiple users is a rare event (storage of emails,
 storage of Skype contacts, ...), it can be interesting to keep a
@@ -1340,7 +1341,7 @@ to choose Ceph over GlusterFS; both seem to be decent projects
 \cite{ceph_vs_gluster_1}, \cite{ceph_vs_gluster_debate}.
 Ceph is a large project, with many features: object storage, file
 system, block device layer, ... In this experiment, I will focus on
-the distributed file system component.
+the distributed object storage component.
 
 \subsection{Architecture}
 \label{subsec:ceph_architecture}
@@ -1562,10 +1563,10 @@ Although this software does a lot of things (nicely seperate libraries
 per layer), since it is open source software, it is still possible to
 review what is going on.
 
-\section{Database Shards}
-Hortizontal scaling in RDBMs is quite involved, their are different
-aspects to it; managing shards, propagating queries to shards,
-inserting data into new shards.
+\section{Database shards experiment}
+Hortizontal scaling in RDBMs is quite involved and their are different
+aspects to it: managing shards, propagating queries to shards,
+inserting data into the appropriate shards.
 I did some reseach into existing solutions for MySQL and Postgres, but
 I was not able to find a solution that properly covers all the
 aforementioned aspects and that would fit in the scope of this
@@ -1577,6 +1578,161 @@ Some of the solutions that I picked up that looked quite interesting:
 \item MySQL NDB cluster
 \item pgPool
 \end{itemize}
+
+For this experiment, I will setup a cluster with 2 MySQL servers (shards), each
+of these servers will have a database with the exact same schema. I will
+than write a program that inserts new data in the approproate shard
+and write a query to fetch data appropriately.
+Handing sharding on application level, or in a layer where the
+application is build upon, is a common practice
+\cite{tumblr_sharding}. 
+
+\subsection{Setting up the shards}
+I created 2 clones of my base Ubuntu virtual machine: 'msql-shard1'
+and 'mysql-shard2'. 
+On both of these virtual machines I installed MySQL:
+\begin{lstlisting}[language=bash]
+sudo apt-get install mysql-server mysql-client
+\end{lstlisting}
+
+We also need to open up the firewall on port 3306:
+\begin{lstlisting}[language=bash]
+sudo ufw allow 3306/tcp
+\end{lstlisting}
+
+\subsection{The database schema}
+I will use this simple database schema to represent a user in my
+application:
+\begin{lstlisting}[language=bash]
+src/mysql_shard_schema.sql
+\end{lstlisting}
+We have a 'user' entity and each 'user' has 0 or more 'post's. Our
+database schema allows us to cleanly partition our dataset (based on
+the user entity). A user row is stored on a specific shard, and all
+this user's posts are stored on the same shard.\\
+We determine which shard a user should be put in based on the hash of
+the user's name.
+
+Let's create a new database on both nodes:
+\begin{lstlisting}[language=bash]
+mysql -u root -p
+*type password*
+mysql> CREATE DATABASE ossec;
+\end{lstlisting}
+Now we can use this database, and create our user table:
+\begin{lstlisting}[language=bash]
+mysql -u plibin -p ossec < mysql_shards_schema.sql
+\end{lstlisting}
+To create a dedicated user 'plibin' and grant this user access to our
+newly created database (from all the IP address in my local
+(VirtualBox) network):
+\begin{lstlisting}[language=bash]
+mysql> CREATE user 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
+mysql> GRANT ALL privileges on ossec.* TO 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
+\end{lstlisting}
+
+It is import to also pass the password to the $GRANT ALL$
+statement. If not, the specified user no longer has to provide a
+password!
+
+\subsection{The application}
+I wrote funtions to allow for the following functionality:
+\begin{itemize}
+\item insert a new user in the correct shard
+\item post a message (as a user)
+\item query for users that posted a message with a certain string
+  pattern
+\item get the posts of a specific user
+\end{itemize}
+
+I grouped the aforementioned function in a command line program.
+All source code is appended in the Appendix B.
+
+I ran the progam on 'node1', in order to do this, I had to install
+Java (reference) and the ant build software (reference):
+\begin{lstlisting}[language=bash]
+apt-get install openjdk-7-jdk
+apt-get install ant
+\end{lstlisting}
+
+I also added the IP addresses of 'shard1' and 'shard2' to 'node1's
+/etc/hosts (since my program relies on hostnames, rather than IP
+addresses).
+
+The Java that I created to write this program includes a ant build
+file which can be used to create a JAR-file. This JAR-file can be
+executed using the Java runtime \footnote{This java project is part of
+this my OSSEC github repository}. 
+
+To build the source code and generate a JAR-file:
+\begin{lstlisting}[language=bash]
+cd shards
+ant
+\end{lstlisting}
+
+I'll give an example how to execute the different functions of the
+program.\\
+To add a user:
+\begin{lstlisting}[language=bash]
+java -jar dist/shard-test.jar add-user plibin
+\end{lstlisting}
+To post a message as a user:
+\begin{lstlisting}[language=bash]
+java -jar dist/shard-test.jar add-user plibin
+\end{lstlisting}
+To list all posts made by a user:
+\begin{lstlisting}[language=bash]
+java -jar dist/shard-test.jar get-posts plibin
+\end{lstlisting}
+To list all posts that contain a certain pattern:
+\begin{lstlisting}[language=bash]
+java -jar dist/shard-test.jar users-that-posted-pattern plibin
+\end{lstlisting}
+
+I recorded a movie to demonstrate this program: mov/shards-*.mov.
+
+\subsection{Conclusion and remarks}
+Setting up a sharded database environment is quite involved, I only
+looked at the application side of the problem. There are much more
+aspects to it: rebalancing your shards, adding new shards, ....
+The application that I conceived is a small experiment, but it clearly
+shows some important aspects of handling shards from an application
+point of view as well as from the database instance point of view.
+The nice things about this example is that several instances of the
+application could run simultaneous without any modifications of the
+program.
+Implementing parallel queries (parallel in a sense that the query is
+executed simultaneous on the different queries) could be done without
+much efforts (if still time, implement this).
+
+\subsection{Additional thoughts}
+\subsubsection{Libraries for application sharding}
+There also exist libraries that make this kind
+of application sharding easier, some examples are: HiveDB
+\cite{hivedb} and Hibernate \cite{hibernate_tenants}.
+
+\subsubsection{Relational database on top of distributed object
+  storage system} 
+By doing research into this field, I came to understand that
+horizontal scaling RDBMs is involved and complicated. I can only
+imagine that things get much more complicated when you have to deal
+with huge amounts of data.\\
+Because of this, I started wondering whether it would not be possible
+to scale the datastore (using a distributed object storage system)
+rather than the number of database servers. 
+I was not able to find such solutions yet, but it is also an idea that
+is suggested on a page on the Ceph website
+\cite{ceph_more_than_an_object_store}.
+
+\subsubsection{NoSQL database}
+A natural solution for the kind of problems sharding tries to solved
+can be found using NoSQL database. Several solutions exist and I
+already discussed some in one of the previous sections
+\ref{sec:no_sql}.
+I had hoped to investigate one of these systems in this project, but
+unfortunately, I did not have the time to look into this any
+more. However, this is certainly a technology that I want to further
+investigate. 
 
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
