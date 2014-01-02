@@ -59,7 +59,7 @@ public class Actions {
 		List<Post> posts = new ArrayList<Post>();
 		
 		try {
-			String sql = "SELECT name, message, FROM post WHERE message LIKE";
+			String sql = "SELECT name, message FROM post WHERE message LIKE ?";
 			PreparedStatement s = createConnection(shard).prepareStatement(sql);
 			s.setString(1, "%" + pattern + "%");
 			ResultSet rs = s.executeQuery();

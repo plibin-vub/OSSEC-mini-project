@@ -22,7 +22,7 @@ public class Commands {
 		} else if ("users-that-posted-pattern".equals(command)) {
 			System.out.println("Users that posted posts with this pattern( " + args[1] + "):");
 			for (Post post : Actions.findAllPostsWithPattern(args[1])) {
-				System.out.println("\"" + post.name + ":\"" + "\"" + post.message + "\"");
+				System.out.println("\"" + post.name + "\":" + "\"" + post.message + "\"");
 			}
 		}
 	}
