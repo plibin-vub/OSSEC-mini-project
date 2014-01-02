@@ -1,5 +1,7 @@
 package ossec.shards;
 
+import ossec.shards.Actions.Post;
+
 public class Commands {
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -19,8 +21,8 @@ public class Commands {
 			}
 		} else if ("users-that-posted-pattern".equals(command)) {
 			System.out.println("Users that posted posts with this pattern( " + args[1] + "):");
-			for (String user : Actions.findUsersThatPostedPattern(args[1])) {
-				System.out.println(user);
+			for (Post post : Actions.findAllPostsWithPattern(args[1])) {
+				System.out.println("\"" + post.name + ":\"" + "\"" + post.message + "\"");
 			}
 		}
 	}

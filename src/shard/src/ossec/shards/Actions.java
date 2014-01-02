@@ -41,28 +41,33 @@ public class Actions {
 		}
 	}
 	
-	static List<String> findUsersThatPostedPattern(String pattern) {
-		List<String> users = new ArrayList<String>();
+	static List<Post> findAllPostsWithPattern(String pattern) {
+		List<Post> posts = new ArrayList<Post>();
 		
 		for (String shard : MapShards.allShards()) {
-			users.addAll(findUsersThatPostedPattern(shard, pattern));
+			posts.addAll(findAllPostsWithPattern(shard, pattern));
 		}
 		
-		return users;
+		return posts;
 	}	
 	
-	private static List<String> findUsersThatPostedPattern(String shard, String pattern) {
-		List<String> users = new ArrayList<String>();
+	static class Post {
+		String name;
+		String message;
+	}
+	private static List<Post> findAllPostsWithPattern(String shard, String pattern) {
+		List<Post> posts = new ArrayList<Post>();
 		
 		try {
-			String sql = "SELECT message, COUNT(name) FROM post WHERE message LIKE ? GROUP BY name";
+			String sql = "SELECT name, message, FROM post WHERE message LIKE";
 			PreparedStatement s = createConnection(shard).prepareStatement(sql);
 			s.setString(0, "%" + pattern + "%");
 			ResultSet rs = s.executeQuery();
 			while(rs.next()) {
-				String user = rs.getString("name");
-				int count = rs.getInt(1);
-				users.add(user + "(" + count +" posts)");
+				Post p = new Post();
+				p.name = rs.getString("name");
+				p.message = rs.getString("message");
+				posts.add(p);
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -70,7 +75,7 @@ public class Actions {
 			e.printStackTrace();
 		}
 		
-		return users;
+		return posts;
 	}
 	
 	static List<String> getPosts(String name) {
