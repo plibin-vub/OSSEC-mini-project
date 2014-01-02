@@ -1,0 +1,75 @@
+Dear Professor Timmerman, Mr. Fayyad-Kazan,
+
+This mail contains my fifth bi-weekly situation report for the OSSEC mini-project.
+
+1. What did I do.
+
+24/12/2013 (3.5h)
+1. Finalize DRBD's setup
+2. Test DRBD
+3. Write down all my DRBD experiences
+4. Create some movies to demonstrate the tests
+
+24/12/2013 (3h)
+1. Read about Ceph architecture.
+2. Read about different ways to install Ceph.
+
+27/12/2013 (7h)
+1. Install virtual machines to test Ceph (3 cluster nodes, 1 admin node)
+2. Install Ceph on admin node, on cluster nodes
+3. Configure general cluster
+4. Configure storage cluster with monitor
+5. Write down all the steps in my report.
+6. Test the object storage setup
+7. Test adding an Object Storage Daemon (on the fly).
+8. Create some video's with a demo of the setup.
+
+27/12/2013 (3h)
+1. Read about sharding for MySQL/Postgres.
+2. Review different solutions.
+
+27/12/2013 (1h)
+1. Work on the Latex formatting of my report document.
+
+02/01/2014 (2h)
+1. Work on the latex document (references, formatting, images, …).
+2. Investigate video editing, to edit my example videos.
+3. Investigate how I can include the videos in my presentation.
+
+02/01/2014 (7h)
+1. Read about sharding.
+2. Setup a MySQL cluster environment (with 2 new virtual machines).
+3. Install MySQL on the nodes and configure it properly so it can be accessed from another node.
+4. Implement the sharded application (Java).
+5. Test the sharded application on the MySQL cluster.
+6. Write down all steps and remarks in my report.
+7. Create a demonstration video.
+
+03/01/2014 (2h)
+1. Read about the wikipedia functionality and architecture.
+
+In total I spent 28.5 hours on the project this period.
+
+2. What will I do in the next period.
+I will figure out an architecture that fits the needs of Wikipedia to be both scalable and provides high availability.
+I will finalise my report and work on my presentation. 
+I plan to spend 3 more full days on this (33hours) and I should be able to submit my report and presentation (draft) on 12/01/2014 (5 days before the exam on 17/01/2014).
+
+3. Problems.
+I had some problems to make Java connect to the MySQL server.
+In the end, it seems that you have to provide a password (IDENTIFIED BY clause) when performing a GRANT ALL, if you omit this, the GRANT ALL will store the access rule without any password. My Java application was configured to use a password, so this did not work.
+It took me some time to figure out what was wrong, but I think the final result of this experiment is nice.
+
+4. Open issues.
+At this moment there are no open issues.
+
+5. Assistance
+At this moment no assistance is required.
+
+6. Other urgent matters
+None.
+
+Kind regards,
+
+Pieter Libin
+Working student "Master in Applied Informatics"
