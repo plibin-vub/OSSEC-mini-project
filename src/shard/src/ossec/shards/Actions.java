@@ -95,15 +95,6 @@ public class Actions {
 		return posts;
 	}
 	
-	private static ResultSet queryShard(String shard, String query) throws ClassNotFoundException, SQLException {
-		List<Object[]> result = new ArrayList<Object[]>();
-		
-		Statement s = createConnection(shard).createStatement();
-	    ResultSet rs = s.executeQuery(query);
-	    
-	    return rs;
-	}
-	
 	private final static String user = "plibin";
 	private final static String password  = "plibin";
 	private final static String database = "ossec";
