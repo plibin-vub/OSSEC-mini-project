@@ -55,13 +55,14 @@ public class Actions {
 		List<String> users = new ArrayList<String>();
 		
 		try {
-			String sql = "SELECT * FROM post WHERE message LIKE ?";
+			String sql = "SELECT message, COUNT(name) FROM post WHERE message LIKE ? GROUP BY name";
 			PreparedStatement s = createConnection(shard).prepareStatement(sql);
 			s.setString(1, "%" + pattern + "%");
 			ResultSet rs = s.executeQuery();
 			while(rs.next()) {
 				String user = rs.getString("name");
-				users.add(user);
+				int count = rs.getInt(1);
+				users.add(user + "(" + count +" posts)");
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -93,15 +94,6 @@ public class Actions {
 		}
 		
 		return posts;
-	}
-	
-	private static ResultSet queryShard(String shard, String query) throws ClassNotFoundException, SQLException {
-		List<Object[]> result = new ArrayList<Object[]>();
-		
-		Statement s = createConnection(shard).createStatement();
-	    ResultSet rs = s.executeQuery(query);
-	    
-	    return rs;
 	}
 	
 	private final static String user = "plibin";
