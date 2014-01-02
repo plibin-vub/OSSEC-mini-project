@@ -104,13 +104,14 @@ public class Actions {
 	    return rs;
 	}
 	
-	private static String user = "plibin";
-	private static String password  = "plibin";
-	private static Connection createConnection(String shard) throws ClassNotFoundException, SQLException {
+	private final static String user = "plibin";
+	private final static String password  = "plibin";
+	private final static String database = "ossec";
+	private final static Connection createConnection(String shard) throws ClassNotFoundException, SQLException {
 	      Class.forName("com.mysql.jdbc.Driver");
 	      Connection connect = DriverManager
 	          .getConnection(
-	        		  "jdbc:mysql://" + shard + "/feedback?" + "user=" + user + "&password=" + password);
+	        		  "jdbc:mysql://" + shard + "/" + database + "?" + "user=" + user + "&password=" + password);
 
 	      return connect;
 	}
