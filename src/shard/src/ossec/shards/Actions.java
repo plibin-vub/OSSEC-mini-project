@@ -111,7 +111,7 @@ public class Actions {
 	      Class.forName("com.mysql.jdbc.Driver");
 	      Connection connect = DriverManager
 	          .getConnection(
-	        		  "jdbc:mysql://" + shard + "/" + database + "?" + "user=" + user + "&password=" + password);
+	        		  "jdbc:mysql://" + shard + "/" + database, user, password);
 
 	      return connect;
 	}
