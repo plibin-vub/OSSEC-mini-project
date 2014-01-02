@@ -3,7 +3,7 @@ CREATE TABLE user (
  PRIMARY KEY (name)
 );
 CREATE TABLE post (
- id INT,
+ id INT NOT NULL AUTO_INCREMENT,
  message TEXT NOT NULL,
  name VARCHAR(100) NOT NULL,
  PRIMARY KEY (id),
