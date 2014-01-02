@@ -1,9 +1,11 @@
 CREATE TABLE user (
- user_name TEXT UNIQUE NOT NULL, 
- region ENUM('flanders','wallonia','brussels') NOT NULL
-)
+ name VARCHAR(100) UNIQUE NOT NULL, 
+ PRIMARY KEY (name)
+);
 CREATE TABLE post (
+ id INT NOT NULL AUTO_INCREMENT,
  message TEXT NOT NULL,
- user_name TEXT NOT NULL,
- FOREIGN KEY(user_name) REFERENCES user
-)
+ name VARCHAR(100) NOT NULL,
+ PRIMARY KEY (id),
+ FOREIGN KEY (name) REFERENCES user(name)
+);
