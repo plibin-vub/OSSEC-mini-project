@@ -357,6 +357,7 @@ are required:
   done using rsync \cite{rsync_software:2013}
 \end{itemize}
 \subsection{Distributed file systems}
+\label{ceph}
 Distributed file systems share storage using a network protocol, they
 deliver scalability and failure
 correction in such a way that it is transparent to the client.
@@ -894,6 +895,7 @@ neg:
 both systems very interesting and mostly complementary
 
 \section{HAProxy experiment}
+\label{ha_proxy_experiment}
 HAProxy is a prominent software load balancer. It acts like a reverse
 proxy; pretending it is the main server and then forwarding the
 requests to one of the HTTP server cluster nodes.
@@ -1737,6 +1739,219 @@ investigate.
 \chapter{Creating a `Wikpedia clone' cluster}
 interesting hints to improve performance: Tarreau:2006 article: p
 17-18 (printed)
+
+Wikipedia is a highly popular free online encyclopedia, free 
+as in ``free beer'', but also and maybe more importantly as in ``free
+speech'' (text is contributed to wikipedia under the GNU Free
+Documentation License \cite{gnu_free_doc_license} and Creative Commons
+Attribution-ShareAlike License \cite{cca_license}).\\ It is a
+collaborative platform: everyone is able to edit any content.
+
+In this chapter I will try to figure out an architecture that fits the
+Wikipedia platform in terms of high-availability and scalability.
+I will focus my work on the handling of text articles, rather than
+multimedia content.
+
+\section{Functional analysis}
+There are 2 main features to Wikipedia:
+\begin{itemize}
+\item editing content or adding new content
+\item viewing content
+\end{itemize}
+Content is submitted to Wikipedia in wikitext
+format \cite{wikitext}, the wikitext language is a lightweight markup
+language. To show this content to the user in a web browser, 
+the wikitext needs to be converted to HTML.
+Content can contain internal links (Wikipedia's MediaWiki software
+calls these free-links). An internal link refers to a page within
+the wiki's domain, and is expressed in specific syntax, for MediaWiki
+this syntax is $[[page\_name]]$. For example: the Wikipedia page of ``Lisbon''
+contains an internal link to ``Portugal'' as can be seen in
+\ref{lisbon_wikipedia}.
+
+\begin{figure}[h!]
+  \caption{Wikipedia page of ``Lisbon'' in edit mode (annotated in
+    red: a free-link to ``Portugal'')}
+  \label{fig:lisbon_wikipedia}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_lisbon.png}
+\end{figure}
+
+Since everyone can edit any content, the submission of incorrect
+content and vandalism can be expected. In
+order to keep this under control, it is important that content can be
+versioned.
+This way, when incorrect content or vandalism is discovered, the
+version containing the problematic content can simply be removed. \\
+
+\section{Some Wikipedia statistics}
+To get a better idea about the needs of the Wikipedia platform in
+terms of high-vailability and scalability, let's take a look at some
+statistics about Wikpedia.
+
+\subsection{Presenting the statistics}
+The Wikimedia foundation publishes statistics about all of their
+products \cite{stats_wikimedia}. The general overview of Wikipedia
+statistics \cite{stats_wikipedia} shows that the English Wikpedia is
+the largest instance of all Wikipedia. Looking at the statistics for
+this instance will be relevant to make assumptions in terms of
+high-vailability and scalability.
+A summary of statistics is available for every Wikipedia instance.
+We'll walk through the statistics summary of the English Wikipedia
+instance, note that the presented charts are copies of the Wikipedia
+statistics website \cite{stats_wikipedia}, downloaded January $7^{th}$
+2014.
+The total number of articles seems to increase linearly \ref{wikipedia_nr_articles_over_time}.
+\begin{figure}[h!]
+  \caption{Total number of English wikipedia articles over time}
+  \label{wikipedia_nr_articles_over_time}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_nr_articles_over_time.png}
+\end{figure}
+The amount of new articles per month seems to stay pretty much the
+same over the last 5 years, however, there were some peaks earlier in
+the history of Wikipedia.
+\begin{figure}[h!]
+  \caption{Number of new articles per month on the English Wikipedia}
+  \label{wikipedia_new_articles_per_month}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_new_articles_per_month.png}
+\end{figure}
+The number of editors stays quite stable since the beginning of 2007
+for frequent and very frequent editors. Since 2008, the number of
+infrequent also has stabilized \ref{wikipedia_active_editors}. Between 2005 and 2007 there was a
+steep growth \ref{wikipedia_active_editors}, but this growth was not
+that spectacular in absolute numbers:
+\begin{itemize}
+\item 5+ edits: from \approx 5000 editors to \approx 45000 editors
+\item 25+ edits: from \approx 2000 editors to \approx 13000 editors
+\item 100+ edits: from \approx 1000 editors to \approx 5000 editors
+\end{itemize}
+\begin{figure}[h!]
+  \caption{Active editors on the English Wikipedia}
+  \label{wikipedia_active_editors}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_active_editors.png}
+\end{figure}
+The average number of edits per month is reported as $2,927,878$
+edits.
+The chart that summarizes the number of page views per month shows 
+a steady growth \ref{wikipedia_page_views}. The growth in absolute
+numbers is significant:
+\begin{itemize}
+\item first quarter 2008: \approx 4500 million
+\item first quarter 2013: \approx 8400 million
+\end{itemize}
+I was not able to find any statistics about page view count before
+2008, but since Wikipedia only started in 2001, with only a
+significant amount of articles since 2005 \ref{wikipedia_nr_articles_over_time}, we can assume that there
+was a steep growth between 2005 and 2008.
+\begin{figure}[h!]
+  \caption{Number of page views per month on the English Wikipedia}
+  \label{wikipedia_page_views}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_page_views.png}
+\end{figure}
+There were statistics about the growth of the Wikipedia database
+\cite{wikipedia_database_growth}, but these statistics seem to be
+discontinued. As to be expected, this database keeps growing linearly,
+and there is no reason to assume this would change.
+The actual articles do not take that much space: the XML dump of the
+current database is only \approx 44 GB \cite{wikipedia_size}. 
+On the other hand, the database with all
+revisions included is much bigger: \cite{wikipedia_size} reports it to be several
+TBs after decompression (in 2010 this was \approx 5TB \cite{wikipedia_full_size}).
+
+\subsection{Interpretation of the statistics}
+There is a significant different between the number of edits and the
+number of views (per month).
+The difference appears to be a factor $>1000$ over the last 6 years.
+We can also see that the number of users (viewers) keeps growing
+steadily (linearly) once the instance gained some popularity. 
+From the moment an instance is started up untill the moment an
+instance gained popularity, a steep growth takes place; adding
+millions of users (viewers) to the sytem over a period of a few
+months/years.
+The following high-availability and scalabilty requirements we need to meet:
+\begin{itemize}
+\item the possibility to handle a large number of
+  simultaneous viewers: from the statistics we can expect \approx 2500
+  requests per second
+\item the possibility to easily scale in the number of viewers
+\item the possibility to handle a moderate amount of editors: from the
+  statistics we can expect \approx 2.5 requests per second
+\item the content should be properly backup-ed and stored in a
+  redundant way, since the content will grow incrementally the storage
+  solution should allow to grow with it
+\end{itemize}
+
+\section{An attempt to setup an architecture}
+Since their is clearly a difference in requirements between viewing content and
+editing content, I think it would make sense to separate this
+functionality.
+
+\subsection{A few thoughts on storing the content with all revision
+  information}
+Wikimedia currently stores the Wikipedia data in databases. However,
+it occured to me that the data consists out of wikitext sections
+(representing the articles) that have a history. So we could also
+store this as a set of text files kept under revision control.
+This would mean that we can store all articles and their history on a
+plain file system.
+Since we are interested at the history of one file at a time, using 
+revision control such as git would a bit overkill. A more efficient
+approach would be to keep a directory with the name of the page and in
+this directory store a set of patch files that represents the history of the
+page.
+For this to work, we would need to write quite some code, so for the
+sake of this demonstration I will use git.
+We expect our content to be >6TB (a reasonal assumption based on
+the fact that it was \approx 5TB in 2010). Currently there is raw
+storage hardware available that supports up to 10TB
+(\cite{hp_10TB_storage} for example), which should be
+sufficient for at least 5 years of scalability.
+Note that we could also opt for a ceph cluster \ref{ceph}, with a
+practically unlimited scalabilty, however, for the current state of
+affairs this might be overkill.
+Several hardware solutions exist to setup this data storage in a
+redundant way and make sure it is properly backup-ed. However it is
+also necessary to make explicit incremental backups (since
+we're storing the different revisions of our articles, this could be
+done by only collecting the most recent revisions), these backups
+should also be stored in a datacenter at another physical location.
+The content storage server could than be implemented by a cluster of
+redundant nodes with a unified interface, so that all other servers
+can talk to this cluster as if it is only one machine.
+
+\subsection{HTTP server for editors}
+Since we only expect \approx 2.5 edits per second, this could be
+handled by one machine that hosts a web application that allows
+editing pages and communicates to the content storage server to get
+revisions and submit changes to content.
+In the case one server would no longer be able to handle the load, an
+additional web server could be used to setup an editor cluster, behind
+a HAProxy proxy.
+
+\subsection{HTTP server for editors}
+The current implementation of Wikipedia serves the content to viewers
+using the MediaWiki software, which is PHP software that has to render
+the pages on the server side before it can serve them to the user.
+We no longer store the content in a a database, but as seperate file, so
+we might skip this rendering phase, and serve the files directly.
+Since we expect >2500 requests per second, we still need a cluster of
+HTTP servers to handle this load. We can do that by using HAProxy as a 
+frontend for our HTTP server cluster, this way, we can also easily add
+extra HTTP servers to accomodate an increase in requests.
+However, as mentioned before, our content is stored in wikitext
+format, we cannot serve this directly to our viewers, since their
+browser expects HTML. We can however pre-render the wikitext files (as
+soon an edit was done on one of the files) and store the results of
+this pre-rendering (an HTML file) directly on the HTTP servers that
+are about to serve the content to our viewers \refnote{It is a
+  realistic to want to keep a copy of the HTML file on each HTTP server,
+since we know the dataset only containing the current version of
+the files only takes \approx 44GB (in XML format, we can assume the
+HTML exports of the pages will be of similar size)}.
 
 \chapter{Conclusion} % Major section
 \section{What is lacking}
