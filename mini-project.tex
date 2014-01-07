@@ -1953,6 +1953,149 @@ since we know the dataset only containing the current version of
 the files only takes \approx 44GB (in XML format, we can assume the
 HTML exports of the pages will be of similar size)}.
 
+\section{Testing this architecture}
+To test this architecture, we'll setup the following experiment:
+\begin{itemize}
+\item a content storage server 
+\item a cluster of HTTP servers that can serve HTML files rendered from
+the wiktext files on the content storage server, I will use my
+existing HAProxy cluster for this \ref{ha_proxy_experiment}
+\end{itemize}
+
+\subsection{The content storage server}
+I created a new virtual machine named 'content' by clone my base
+Ubuntu virtual machine.
+To install git (what I will use to handle the revision control):
+\begin{lstlisting}[language=bash]
+sudo apt-get install git
+\end{lstlisting}
+Let's git know who we are:
+\begin{lstlisting}[language=bash]
+git config --global user.name "plibin"
+git config --global user.email "pieter.libin@vub.ac.be"
+\end{lstlisting}
+
+Now we can setup the server git repository \cite{git_setup_server}
+\footnote{Make sure to add this group and the $--shared=group$ option,
+if not you WILL have problems, unfortunately this is not mentioned in
+the the git documentation}: 
+\begin{lstlisting}[language=bash]
+cd /var/
+sudo addgroup gituser
+sudo mkdir wiki-pages.git
+sudo chown -R plibin:gituser wiki-pages.git
+cd wiki-pages.git
+git --bar init --shared=group
+\end{lstlisting}
+To properly initialise the server repository, we need to push
+something to it (still on 'content') \cite{git_setup_server}:
+\begin{lstlisting}[language=bash]
+cd /home/plibin
+mkdir wiki-pages
+cd wiki-pages
+git init
+echo "Wikipedia experiment" > Readme
+git add Readme
+git commit -m 'initial commit'
+git remote add origin /var/wiki-pages.git
+git push origin master
+\end{lstlisting}
+
+We need to make it possible for  'content' to contact 'node1' and
+'node2' whenever a new (git) push is received by 'content'. The
+easiest way to do this is by letting 'content' executing a remote command on
+the nodes via ssh.\\
+In order to do this we need to configure the nodes so that we do not
+need to provide a password when logging in with ssh. 
+We can do this by executing the following commands (on 'content')
+\footnote{I added 'node1' and 'node2' to 'content's /etc/hosts file}:
+\begin{lstlisting}[language=bash]
+ssh-keygen
+ssh-copy-id node1
+ssh-copy-id node2
+\end{lstlisting}
+
+Now we need to add a hook to our git repository (on 'content) that
+executes an update-script on our nodes ('node1' and 'node2')
+\cite{git_hooks}.
+We need to add a 'post-receive' hook, such a hook is triggered
+whenever the git repository receives a push.
+To add such a hook:
+\begin{lstlisting}[language=bash]
+cd /var/wiki-pages.git
+echo "ssh plibin@node1 /home/plibin/update-wiki-pages.sh" >> ./hooks/post-receive
+echo "ssh plibin@node2 /home/plibin/update-wiki-pages.sh" >> ./hooks/post-receive
+chmod +x ./hooks/post-receive
+\end{lstlisting}
+
+\subsection{The HTTP nodes}
+Now we need to provide an update-wiki-pages.sh script on the 2 nodes,
+this script will:
+\begin{itemize}
+\item do a git pull to get the latest content from the storage server
+'content'
+\item convert all files (that are in wikitext form: more specifically
+  in the creole dialect \cite{creole_dialect}) to HTML; for this I use
+  the txt2tags program \footnote{Updating all files is not efficient;
+    in a production environment we would only update  the files that actually changed}
+\end{itemize}
+
+The code for this script:
+ \begin{lstlisting}[language=bash]
+src/wikipedia/update-wiki-pages.sh
+\end{lstlisting}
+This script calls another simple script that converts a creole file to
+an HTML file:
+ \begin{lstlisting}[language=bash]
+src/wikipedia/creole2html.sh
+\end{lstlisting}
+
+We need to install txt2tags to convert the Creole files to HTML and git (this
+command should be executed on 'node1' and 'node2'):
+\begin{lstlisting}[language=bash]
+sudo apt-get install txt2tags
+sudo apt-get install git
+\end{lstlisting}
+
+To make sure that this script can do its job, we need to clone the git
+repository from the 'content' server on both nodes ('node1' and 'node2'):
+ \begin{lstlisting}[language=bash]
+cd ~
+git clone content:/var/wiki-pages
+\end{lstlisting}
+We now also need to be able to contact 'content' over ssh without using
+a password (these commands should be executed on 'node1' and 'node2'):
+\begin{lstlisting}[language=bash]
+ssh-keygen
+ssh-copy-id content
+\end{lstlisting}
+
+To configure the webserver, we simply need to make a link to our
+wiki-pages git repository in /var/www \footnote{Simply making a
+  symbolic links allows the users to also see the .crl files, which is
+  not our intention, this can be fixed by configuring Apache to only
+  show html file.}:
+\begin{lstlisting}[language=bash]
+cd /var/www/
+sudo ln -s ~/wiki-pages/ wiki
+\end{lstlisting}
+
+\subsection{Testing the setup}
+After adding a ``Portugal''-page and ``Lisbon''-page that references
+the Portugal page in Creole format to the content storage server, the
+wiki seems to work fine (as can be seen in \ref{fig:wikipedia_clone_1}).
+
+\begin{figure}[h!]
+  \caption{Accessing our wiki via HAProxy (haproxy server has
+    IP-address 192.168.15.10)}
+  \label{wikipedia_clone_1}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/wikipedia_clone_1.png}
+\end{figure}
+
+I recorded a movie where I add another page about ``Faial'', which is
+an island in the Portugese Azorean archipel (movies/wikipedia_clone_add_faial.mov).
+
 \chapter{Conclusion} % Major section
 \section{What is lacking}
 The ability to replicate journaled filesystems (by using the journal),
