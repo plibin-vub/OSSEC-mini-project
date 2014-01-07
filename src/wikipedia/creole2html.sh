@@ -10,4 +10,4 @@ txt2tags --target=html --outfile="$BASE_FILE.html" "$CREOLE_FILE"
 #I replace them here with this quick regexp hack, however,
 #this is not production code, since it does not handle special characters such
 #as spaces properly
-sed --in-place -e 's/\[\[\([^]]*\)\]\]/\\<a href="\1">\1<\\a>/g' $HTML_FILE
+sed --in-place -e 's/\[\[\([^]]*\)\]\]/\<a href="\1">\1<\\a>/g' $HTML_FILE
