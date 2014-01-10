@@ -1823,9 +1823,9 @@ infrequent also has stabilized \ref{wikipedia_active_editors}. Between 2005 and 
 steep growth \ref{wikipedia_active_editors}, but this growth was not
 that spectacular in absolute numbers:
 \begin{itemize}
-\item 5+ edits: from \approx 5000 editors to \approx 45000 editors
-\item 25+ edits: from \approx 2000 editors to \approx 13000 editors
-\item 100+ edits: from \approx 1000 editors to \approx 5000 editors
+\item 5+ edits: from $\approx 5000$ editors to $\approx 45000$ editors
+\item 25+ edits: from $\approx 2000$ editors to $\approx 13000$ editors
+\item 100+ edits: from $\approx 1000$ editors to $\approx 5000$ editors
 \end{itemize}
 \begin{figure}[h!]
   \caption{Active editors on the English Wikipedia}
@@ -1839,8 +1839,8 @@ The chart that summarizes the number of page views per month shows
 a steady growth \ref{wikipedia_page_views}. The growth in absolute
 numbers is significant:
 \begin{itemize}
-\item first quarter 2008: \approx 4500 million
-\item first quarter 2013: \approx 8400 million
+\item first quarter 2008: $\approx 4500$ million
+\item first quarter 2013: $\approx 8400$ million
 \end{itemize}
 I was not able to find any statistics about page view count before
 2008, but since Wikipedia only started in 2001, with only a
@@ -1857,10 +1857,10 @@ There were statistics about the growth of the Wikipedia database
 discontinued. As to be expected, this database keeps growing linearly,
 and there is no reason to assume this would change.
 The actual articles do not take that much space: the XML dump of the
-current database is only \approx 44 GB \cite{wikipedia_size}. 
+current database is only $\approx 44 GB$ \cite{wikipedia_size}. 
 On the other hand, the database with all
 revisions included is much bigger: \cite{wikipedia_size} reports it to be several
-TBs after decompression (in 2010 this was \approx 5TB \cite{wikipedia_full_size}).
+TBs after decompression (in 2010 this was $\approx 5TB$ \cite{wikipedia_full_size}).
 
 \subsection{Interpretation of the statistics}
 There is a significant different between the number of edits and the
@@ -1875,11 +1875,11 @@ months/years.
 The following high-availability and scalabilty requirements we need to meet:
 \begin{itemize}
 \item the possibility to handle a large number of
-  simultaneous viewers: from the statistics we can expect \approx 2500
+  simultaneous viewers: from the statistics we can expect $\approx 2500$
   requests per second
 \item the possibility to easily scale in the number of viewers
 \item the possibility to handle a moderate amount of editors: from the
-  statistics we can expect \approx 2.5 requests per second
+  statistics we can expect $\approx 2.5$ requests per second
 \item the content should be properly backup-ed and stored in a
   redundant way, since the content will grow incrementally the storage
   solution should allow to grow with it
@@ -1906,7 +1906,7 @@ page.
 For this to work, we would need to write quite some code, so for the
 sake of this demonstration I will use git.
 We expect our content to be >6TB (a reasonal assumption based on
-the fact that it was \approx 5TB in 2010). Currently there is raw
+the fact that it was $\approx 5TB$ in 2010). Currently there is raw
 storage hardware available that supports up to 10TB
 (\cite{hp_10TB_storage} for example), which should be
 sufficient for at least 5 years of scalability.
@@ -1924,7 +1924,7 @@ redundant nodes with a unified interface, so that all other servers
 can talk to this cluster as if it is only one machine.
 
 \subsection{HTTP server for editors}
-Since we only expect \approx 2.5 edits per second, this could be
+Since we only expect $\approx 2.5 edits per second$, this could be
 handled by one machine that hosts a web application that allows
 editing pages and communicates to the content storage server to get
 revisions and submit changes to content.
@@ -1947,10 +1947,10 @@ format, we cannot serve this directly to our viewers, since their
 browser expects HTML. We can however pre-render the wikitext files (as
 soon an edit was done on one of the files) and store the results of
 this pre-rendering (an HTML file) directly on the HTTP servers that
-are about to serve the content to our viewers \refnote{It is a
+are about to serve the content to our viewers \footnote{It is a
   realistic to want to keep a copy of the HTML file on each HTTP server,
 since we know the dataset only containing the current version of
-the files only takes \approx 44GB (in XML format, we can assume the
+the files only takes $\approx 44GB$ (in XML format, we can assume the
 HTML exports of the pages will be of similar size)}.
 
 \section{Testing this architecture}
@@ -2094,7 +2094,7 @@ wiki seems to work fine (as can be seen in \ref{fig:wikipedia_clone_1}).
 \end{figure}
 
 I recorded a movie where I add another page about ``Faial'', which is
-an island in the Portugese Azorean archipel (movies/wikipedia_clone_add_faial.mov).
+an island in the Portugese Azorean archipel (movies/wikipedia\_clone\_add\_faial.mov).
 
 \chapter{Conclusion} % Major section
 \section{What is lacking}
