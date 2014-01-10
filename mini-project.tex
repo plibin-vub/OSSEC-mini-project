@@ -153,6 +153,7 @@ this domain. In this chapter, I present a short overview of the
 importance of these aspects in other domains.
 
 \section{Airplane/car/spacecraft software}
+\subsection{On-board computers}
 Cars and planes that are released are operated by millions of lines of code
 \cite{ieee_cars_and_planes}. It is of course vital in such devices
 that there is a high level of availability; important systems (breaks,
@@ -169,6 +170,11 @@ up-link (where signals take 1 to 1.5 hours \cite{mars_rover} to go
 from one end to the other). Needless to say, these vehicles foster a
 huge development and production cost, which is an extra motivation to
  keep the system running as long as physically possible.
+\subsection{Computer Aided Design}
+The design of vehicles can be assisted with several software
+solutions, these software packages require a lot of computational
+power and can benifit from the use o High Performance Clusters
+\cite{hpc_cars}.
 
 \section{Healthcare}
 \subsection{Patient monitoring}
@@ -204,31 +210,362 @@ definitely not the case on these kind of devices.
 \label{chap:aspects}
 \section{Hardware}
 \subsection{Servers}
+Servers are the processing nodes in the cluster, the contain a CPU
+(often more than one), memory (often a significant amount), one or
+more network interfaces, a power supply (often 2 for redundancy) and
+usually a hard disk.\\
+Several cases exists:
+\subsubsection{Tower server} 
+A tower server comparable to a desktop tower. It's cheap, but it is
+  an inconvenient format to use in cluster rooms.
+\subsection{Rack server}
+These servers are build as thin boxes that can be stacked on top of each other in a rack.
+\subsection{Blade server}
+A blade server is a large computer that is able to contain multiple
+  blades. A blade is essentially a slice containing memory, a CPU and a
+  disk. The power and networking is managed by the surrounding case.
+ Blade servers are convenient for cluster setups since they
+   allow to replace(broken) blades very easily.
+\end{itemize}
 \subsection{Network}
+The network infrastructure connects the different elements in the
+cluster and allows outside users to communicate with the application
+that runs on the cluster.\\
+Several components are used to setup cluster networks:
+\begin{itemize}
+\item switches
+\item routers
+\item firewalls
+\end{itemize}
 \subsection{Storage}
-also backup devices
+Storage can be integrated in a server. There 
+also exists solutions that implement storage so that can be directly
+integrated in the network:
+\begin{itemize}
+\item network attached storage 
+\item storage area network
+\end{itemize}
+There are also seperate units that can be connected to a server directly
+without the need of a network: direct-attached storage.
+\subsubsection{Disk types}
+There currently exist two types of disks: hard disk drives (HDDs) and
+solid state disks (SSDs). A HDD contains rotating platters where data
+is stored by magnetising parts of the disk. An SSD is fully
+implemented in an integrated electronic circuit; it contains no moving
+parts at all (comparable to a USB flash drive).\\
+Overall, SSDs (only ``recently'' on the market) have a much better
+performace. However, traditional HDDs still offer a much better
+price/MB ratio than SSDs do.\\
+Therefore the choice of using HDDs or SSDs usually depends on the
+problem you want to solve: quickly accessing a limited amount of data
+vs storang vast amounts of data that are only issued
+periodically \footnote{The two systems are often used in combination,
+so the technologies can complement each other}.
+
 \section{Infrastructure}
 \subsection{Sites}
+Big companies such as Google, Facebook, Microsoft, ... have there own
+sites to host their clusters. Smaller companies often start by hosting
+their applications on a third party's site. Some of this third party
+provides offer servers that are can be completely adminstered by their
+users (e.g.: rackspace \cite{rackspace}, Amazon EC2 \cite{amazon_ec2}), others provide cloud
+platforms that allows the users to simply install an application
+(e.g.: Google App Engine \cite{google_app_engin}).
+
+\subsection{Location}
+An important aspect to consider is the distance to the end users of
+the cluster. When this distance is too big, users will suffer from the
+network connection's latency. For example between the US
+and Europe, a latency of $\approx 90ms$ can be expected
+\cite{verizon_latency}.
+This is a significant number when we consider that a latency of 1/10th
+of a second (100ms) already starts to feel slow for an end user 
+\cite{web_app_latency}.\\
+Therefore it is beneficial to have the data center as close to the end
+user if possible.\\
+
+Another important aspect is the climate of the region where the data
+center is located. Data centers tend to get hot and cooling down the
+datacenter can become an expensive (and carbon-unfriendly) issue.
+A solution can be to move the datacenter to a colder region 
+\cite{datacenter_cold}.\\
+
+Proximity to an energy provider is another factor that needs to be
+considered \ref{energy_provider}.
+
 \subsection{Buildings}
+The buildings that host a data center need to take a set of precautions to
+avoid or handle natural disasters such as floods, fires, earthquakes
+and extreme weather.\\
+The buildings should be well secured (physically), since quite often, 
+private data of end-users will reside on the servers in the
+building.\\
+By applying passive architectural techniques, the buildings can allow
+the data center to consume dramatically less power (Karen-> link?).
+ 
 \subsection{Energy providers}
+\label{energy_provider}s
+Data centers might incorporate their own power production on-site by
+using solar panels on the top of the roofs or even building a custom
+power plant.\\
+It should be taken under consideration whether a country / region has
+ trusthworthy energy providers (which can be a problem in development 
+countries).\\
+A company will negotiate a contract that garantuees the availability of power
+within a reasonable treshold.\\
+The datacenter should be able to handle short power-outs, by using
+UPSs and possibly diesel-powered generators.\\
+Considering climate change, the cost of energy might rise
+significantly over the next years, rendering these aspects even more important.
+
 \section{Internet Availability}
+Most companies will work with a third party provider to setup a
+connection with the Internet. \\
+A company will negotiate a contract that garantuees the availability of Internet
+within a reasonable treshold.\\
+
 \section{Storage}
-http://www.tldp.org/REF/INTRO/Backup-INTRO/strategies.html
-http://www.freebsd.org/doc/handbook/backup-strategies.html
+A proper backup strategy should be in place. This strategy will depend
+on the companies resources and the importance of the different
+datasources.
+Some general guidelines for backups (from \cite{ha_book}):
+\subsubsection{Mirroring does not replace backups}
+If a file
+is removed by a human error, a mirrored solution will not be able to
+restore the data.
+Additionally, it is still possible that these disks will
+fail at the same time
+(for example when the power is interrupted).
+
+\subsubsection{Backups are more often used to fix human errors
+  than to fix a disaster}
+For this reason, it is important that restoring data can happen
+quickly.
+
+\subsubsection{Regularly test the restore procedure}
+It is allways possible that there is a hardware problem or some backup
+rule is invalidated. To make sure this is not discovered in the case
+of a disaster, it is important to regularly test both the hardware and
+the restore procedures.
+
+\subsubsection{Handle hardware (and tapes) with care}
+A lot of backups are made on tapes, such cartridges are particularly
+senstive to dust and most, so it is important to store them
+appropriately.
+
+\subsubsection{Only use a tape as many times as the producent
+  garantuees it will work}
+Tapes have an expiration date, make sure to stop using them after this
+date. If you dispose of them, make sure to destroy them thouroughly,
+since they might contain private data.
+
+\subsubsection{Multiple locations}
+If you can afford it, it is allways better to distribute backups over
+multiple physical locations. In case there goes anything seriously
+wrong in one of the datacenters, it is still possible to recover from
+this.
+
 \section{Database systems}
-traditional vs NOSQL
+The following two (mainly) database technologies are currently used in cluster
+settings: Relational database management systems and NoSQL systems.
+
+\subsection{Relational database management systems}
+This technology is based on the relational model \cite{codd}. It
+allows data to be modelled as tables that represent entities. These
+entities are then connected using relations (basically pointers from
+one table to another).\\
+It is possible to query the information in the model using the
+declarative language SQL.\\
+RDBMs implement ACID
+(\ref{appendix_acid}) and transactions, two features which are very
+useful for application developers, but make scaling RDBMs much more difficult.
+
+\subsection{NoSQL databases}
+The concept of NoSQL databases was introduced as a reaction on the
+diffculties of scaling out RDBMs. While RDBMs store data using a relational
+model, most NoSQL solutions simply act as a key-value store ($\approx$
+a distributed dictionary datastructure).\\
+NoSQL databases are usually simpler in design and allow for easier horizontal
+scaling \cite{wikipedia_nosql}.\\
+However, since data is simply stored in a key-value store, joining
+over multiple datasets (which can be easily done with RDBMs) has to be
+implemented on top of the NoSQL database (doing this might still
+be slow \cite{nosql_problems}). \\
+
 \section{Application crashes}
+Software will never be perfect, therefore there will allways be a
+chance that a program crashes. Important is that developers try to
+create defensive software, that rather than to crash will show an
+appropriate error message.\\
+That said, since we cannot built a high-availabilty cluster assuming
+our software will not crash, we need to try to contain the crashes as
+good as possible.\\
+When software is implemented as a process that runs in the user space,
+it cannot crash the entire operating system, but only that specific process (if
+there are no bugs in the operating system). In my opinion this is
+essential to ensure the stability, if not one error can ultimately
+take down the entire cluster.\\
+But still, if we have a web server that is written in C/C++, when an
+error occurs in one of the applications threads, this can potentially
+bring down the entire application server. Java applications can cope
+better with these kind of errors: when one application thread throws
+an exception the application server (Tomcat, JBoss, ...) can continue
+to server all other users.\\ 
+In order to ensure that an error in a  C/C++ program does not crash the entire
+application (and all sessions that are tied to it),  a process can be
+assigned to each application session, however, running the application
+like this will require more computational resources.\\
+When one session of the application throws an error and the
+application server can properly recover from it (by using one of the
+techniques described in the previous paragraphs), we can show the
+user an appropriate error message or try to continue this user's
+session in another thread/process (for example, the current state of
+the user's session is still stored in the database).\\
+Another very imporant remark : when a crash happens, it is important
+to properly log what is wrong and inform an administrator about this
+problem. This way the problem can be investigated and hopefully
+fixed. 
+Because it will not allways be possible to take a look what is
+going on on the production server, it is important for the logging to
+be as complete as possible, so developers and adminstrators can try to
+reproduce the problem without the need to investiage the production system.
+
 \section{Human error}
+A lot of problems are introduced by human errors: bugs in
+applications, bugs in operating systems, errors in architectures and
+their implementation, ...\\
+While it makes sense to have redundancy in hardware, it makes equally
+sense to have redundancy in developers and system administrators.\\
+For developers, it is vital to have peer reviews, or even pair
+development techniques for the more complicated parts of a system.\\
+System adminstrators often take decisions that can impact huge parts
+of a cluster, so it would probably be a good idea to double-check such
+decisions before actually applying them. This can be done by first
+applying the changes on a test setup before pushing them to the
+production cluster \footnote{Its vital for system adminstrators to
+  have a sandbox that allows them to perform realistic tests}.\\
+It is also important that the knowledge of systems and processes is
+well distributed over employees, in case any of the employees leaves,
+the system can still be operational. Therefore it is also important
+that architectures, procedures and system layouts are thouroughly
+documented, and that this documentation is kept up to date. 
+
 \section{Operating systems}
-microkernel vs monolithic kernels
-minix: driver reincarnation
+GNU/Linux is very popular in cluster settings
+\cite{server_market_share}.
+The GNU/Linux operating system is known for its speed and stability.
+It is however important to note that the kernel has a monolithic
+design. While this makes it a very fast kernel, it still allows system drivers
+to crash the entire kernel. \\
+Since clusters will usually use reputed well-tested hardware that has
+good driver support for the Linux kernel, this is usually not  a
+problem.\\
+When an operating system does crash for some reason (a bug, or a
+hardware failure) this should be dealt with appropriately, for example
+by restarting the cluster node that has crashed or (if the crashed
+node cannot be started again) by starting a new node that will take
+the crashed node's place.\\
+When a crash happens, it is essential to investigate what went wrong,
+so lessons can be learned and actions can be takes to avoid the
+problem from happening again.
+
 \section{Monitoring}
+It is important to monitor the status of a cluster, to take actions in
+case there is something wrong. On the other hand, we should also take
+care not to overload the network with constantly polling nodes.\\
+Two aspects are particularly important when monitoring: 
+\begin{itemize}
+\item gathering usage statictics (CPU usage, network load, ...)
+\item diagnose problems in time (and act on them)
+\end{itemize}
+
 \section{Virtualization}
+Virtualization is a technique that is used a lot in cluster
+environments. It allows to deal with server resources in a more
+abstract fashion.\\
+This allows certain actions to be automated in an easier way;
+for example: restarting a node only requires invoking a program.\\
+Furthermore, it allows server resources to be split up easier; one
+virtualized node can use a part of the physical memory of an
+underlying server, or only 1 of the several CPUs the underlying server
+has installed.\\
+Virtualizing hardware has some costs in terms of performance, however,
+these days, several hardware provisions are in place to further
+improve the performance of virtual machines (e.g.: Intel's Hardware-Assisted
+Virtualization Technology \cite{intel_havt}, AMD Virtualization
+\cite{amd_virt}).
+
 \section{Different kinds of outages}
-describe types + explain how to measure
+I will present an overview of the different kind of outages that are
+possible (based on \cite{ha_book}):
+\subsection{Hardware}
+Hardware can fail whether it is new or old. Especially prone for
+defect are the moving parts in a computer: the HDDs, tape drives,
+tape libraries and fans.\\
+To extend the computer's lifetime, the machine needs to be properly
+cooled \footnote{A sufficient amount of fans is required and the room needs to
+be air contioned}. \\
+There should be as little dust in the room as possible to avoid the
+fans to get clogged.\\
+The life-time of servers that run constantly under heavy load is
+considered to be 3 years \cite{ms_cloud_cost}.
+
+\subsection{Environmental and physical failure}
+\subsubsection{Natural disasters}
+\begin{itemize}
+\item earth quakes
+\item fires
+\item floods
+\item extreme wheather
+\end{itemize}
+\subsubsection{Infrastructure failure}
+\begin{itemize}
+\item cables that break
+\item air conditioing that breaks down
+\item UPSs or diesel generators that fail
+\end{itemize}
+\subsubsection{Third party delivery failure}
+\begin{itemize}
+\item internet delivery failures
+\item power delivery failures
+\end{itemize}
+
+\subsection{Network failures}
+It is possible that network components fail (hardware and/or
+software). Also problems with the DNS or DHCP servers might occur.\\
+Distributed Denial-of-service (DDOS) \ref{ddos} or other security 
+ attacks can shutdown an entire network.
+
+\subsection{Application failures}
+All layers of your application could experience problems: the web/application
+server, the database or the actual application.
+
 \section{Definition of high availability, expectations and realistic
   goals}
-99.9999... perc rule
+\subsection{Definition of high availability}
+I use the definition used in \cite{ha_book}:\\
+``Availability is a measure of the time that is server is functionning
+normally''.\\
+Availability can be calculated with this formula \cite{ha_book}:
+$A=\frac{mean time between failures}{(mean time between failures) +
+  mean time to repair}$.\\
+An example: to achieve $99.9999 %$ availability one is permitted to 6
+minutes downtime in 11.4 years! This is highly improbable to be
+achieved \cite{ha_book}.\\
+A more realistic goal could be 10 minutes downtime per year, this is
+expressed in an availability percentage of $99.998$ \cite{ha_book}.\\
+\subsubsection{Expectations and realistic goals}
+Unavailability can cost lots of money: people of your online webshop
+might leave and look for another webshop, ...\\
+However, we should always try to be realistic in our expectations, if $50%$
+of a company's datacenters fail, there is a good chance not everyone
+will still be able to be server, however, this is such a far-fetched
+scenario that it is probably not cost-effective to try to preempt
+it.\\
+No matter how good an infrastructure is setup, there are always
+aspects that are beyond our control \cite{black_swan}, so it is
+important to be careful promising availability percentages to
+customers. \\
 
 \chapter{Scalability and its effects on economy and environment}
 
@@ -2203,12 +2540,17 @@ like in MS DPM.
 Round robin (refer to this appendix from the places where round robin
 was used)
 Round robin database
-ACID
+\section{ACID}
+\label{appendix_acid}
 RAID
+-> zie boek
 RAID-1
+-> zie boek
 delta encoding
 NTP
 HMAC
+DDOS
+\label{ddos}
 \end{appendices}
 
 %----------------------------------------------------------------------------------------
