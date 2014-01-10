@@ -5,7 +5,6 @@
 \documentclass[12pt]{report} 
 % Default font size is 12pt, it can be changed here
 
-\usepackage{appendix}
 \usepackage{geometry} % Required to change the page size to A4
 \geometry{a4paper} % Set the page size to be A4 as opposed to the default US Letter
 
@@ -228,7 +227,6 @@ A blade server is a large computer that is able to contain multiple
   disk. The power and networking is managed by the surrounding case.
  Blade servers are convenient for cluster setups since they
    allow to replace(broken) blades very easily.
-\end{itemize}
 \subsection{Network}
 The network infrastructure connects the different elements in the
 cluster and allows outside users to communicate with the application
@@ -379,7 +377,7 @@ one table to another).\\
 It is possible to query the information in the model using the
 declarative language SQL.\\
 RDBMs implement ACID
-(\ref{appendix_acid}) and transactions, two features which are very
+and transactions, two features which are very
 useful for application developers, but make scaling RDBMs much more difficult.
 
 \subsection{NoSQL databases}
@@ -551,15 +549,17 @@ normally''.\\
 Availability can be calculated with this formula \cite{ha_book}:
 $A=\frac{mean time between failures}{(mean time between failures) +
   mean time to repair}$.\\
-An example: to achieve $99.9999 %$ availability one is permitted to 6
+An example: to achieve 99.9999 \% availability one is permitted to 6
 minutes downtime in 11.4 years! This is highly improbable to be
 achieved \cite{ha_book}.\\
 A more realistic goal could be 10 minutes downtime per year, this is
-expressed in an availability percentage of $99.998$ \cite{ha_book}.\\
+expressed in an availability of 99.998\% \cite{ha_book}.
+
 \subsubsection{Expectations and realistic goals}
 Unavailability can cost lots of money: people of your online webshop
-might leave and look for another webshop, ...\\
-However, we should always try to be realistic in our expectations, if $50%$
+might leave and look for another webshop, the stock market that is not
+able to respond, ...\\
+However, we should always try to be realistic in our expectations, if 50\%
 of a company's datacenters fail, there is a good chance not everyone
 will still be able to be server, however, this is such a far-fetched
 scenario that it is probably not cost-effective to try to preempt
@@ -567,9 +567,33 @@ it.\\
 No matter how good an infrastructure is setup, there are always
 aspects that are beyond our control \cite{black_swan}, so it is
 important to be careful promising availability percentages to
-customers. \\
+customers. 
 
 \chapter{Scalability and its effects on economy and environment}
+\section{Power consumption}
+The power consumed by large web applications is huge. As an
+example, in 2011 Facebook consumed 532 million kilowatt hours of
+energy and Google consumed 2 billion kilowatt hours of
+energy in 2010 \cite{datacenter_power} \footnote{As a comparison:
+  Belgium used 84 billion kilowatt hours in 2008}
+
+\section{Software efficiency}
+For some companies (such as Facebook) one of the reasons why this
+power consumption is so high is that it takes a lot of computation to
+render PHP pages \cite{facebook_php}. Facebook in particular is trying
+to fix this by creating a PHP virtual machine \cite{php_vm}.\\
+Note that using more efficient programming language such as Java or C++ 
+from the start of such projects might make these kind of efforts
+obsolete.
+
+\section{Climate change}
+Needless to say that numbers in the range of Google's or Facebook's
+power usage contribute significantly to climate change. Since it can
+be expected that the demand for cloud solutions will only go up, my
+opinion is that green datacenters will become more
+important in the near future \footnote{With green datacenters I imply
+  effecient hardware and datacenters but efficient and power conscious
+applications as well.}.\\
 
 \chapter{Identifying high availability and scalability solutions}
 \section{Cluster nodes}
@@ -1189,8 +1213,7 @@ Reference to movie: movies/nagios-setup.mov
 I will use the same set of virtual machines to setup the Ganglia
 experiment: 'node1', 'node2' and 'monitor'.
 The 'monitor' node will periodically ask the client nodes for their
-metrics and store these metrics in a round-robin database (see
-appendix).
+metrics and store these metrics in a round-robin database.
 To install the software required for this monitoring (gmetad) we execute the
 following command:
 \begin{lstlisting}[language=bash]
@@ -1204,7 +1227,7 @@ web-frontend:
 sudo apt-get install ganglia-webfronted
 \end{lstlisting} 
 
-Ganglia supports 2 modes: multicast (zie appendix) and unicast mode.
+Ganglia supports 2 modes: multicast and unicast mode.
 Misschien een beetje uitleg over het verschil.
 The multicast is the detault mechanism, and is the easiest way to
 configure a Ganglia cluster.
@@ -1299,7 +1322,7 @@ perl rrd2csv.pl  /var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd > node1_
 
 However, this command will only export the data of the last minute. To
 export all data that was collected starting from a point further in time, we need to
-explicitely pass the start date in epoch format (see appendix).
+explicitely pass the start date in epoch format.
 An example to extract all data that is one hour old:
 \begin{lstlisting}[language=bash]
 now = `date +%s`
@@ -1392,7 +1415,8 @@ After this installation, a reboot of the virtual machine was required.
 In order to make HAProxy start by the init script we need to put the
 ENABLED variable in $/ect/default/haproxy$ to $1$.
 I use the HAProxy config file that is installed with the haproxy
-Ubuntu package comes with a proper config file by default (reference appendix src/haproxy\_basic.cfg).   
+Ubuntu package comes with a proper config file by default (reference
+to github).   
 In order to configure HAProxy for a specific application, I conceived
 this configuration snippet:
 \begin{lstlisting}[language=bash]
@@ -1613,7 +1637,7 @@ password) in the configuration file; you should use the $CHANGE
 MASTER ...$ SQL command.
 
 \section{Software disk replication experiment}
-I will setup a network RAID-1 (mirroring; appendix: explain RAID-1)
+I will setup a network RAID-1 (mirror)
 system on 2 nodes, for this I will use the software DRBD 
 (Distributed Replicated Block Device) \cite{drbd_soft:2013}.
 I will create a disk (virtual machine disk) of 1GB on my virtual
@@ -1638,8 +1662,7 @@ virtual machines are powered off \ref{fig:add_disk_vbox}.
 \end{figure}
 
 \subsection{Setting up the network RAID-1}
-To ensure the synchronization is timed well, I will install the NTP
-(see appendix) packages.
+To ensure the synchronization is timed well, I will install the NTP packages.
 \begin{lstlisting}[language=bash]
 sudo apt-get install ntp ntpdate
 \end{lstlisting}
@@ -2084,7 +2107,7 @@ I wrote funtions to allow for the following functionality:
 \end{itemize}
 
 I grouped the aforementioned function in a command line program.
-All source code is appended in the Appendix B.
+Reference to github for the source code.
 
 I ran the progam on 'node1', in order to do this, I had to install
 Java (reference) and the ant build software (reference):
@@ -2537,23 +2560,7 @@ an island in the Portugese Azorean archipel (movies/wikipedia\_clone\_add\_faial
 The ability to replicate journaled filesystems (by using the journal),
 like in MS DPM.
 
-\begin{appendices}
-\chapter{Concepts}
-Round robin (refer to this appendix from the places where round robin
-was used)
-Round robin database
-\section{ACID}
-\label{appendix_acid}
-RAID
--> zie boek
-RAID-1
--> zie boek
-delta encoding
-NTP
-HMAC
-DDOS
-\label{ddos}
-\end{appendices}
+
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
