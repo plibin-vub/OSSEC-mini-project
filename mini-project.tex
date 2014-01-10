@@ -102,8 +102,103 @@ Prof. Dr. \\Martin \textsc{Timmerman}
 \newpage % Begins the essay on a new page instead of on the same page as the table of contents 
 
 \chapter{Introduction} % Major section
+\section{Abstract}
+Nowadays, several web-applications exist (Facebook, Wikipedia, Twitter, ...) that serve millions of users concurrently. To achieve this, huge clusters are in place, where each cluster node serves a large amount of users. In order to assure the availability of such applications, it is required that whenever a cluster node crashes, the systems remains responsive and handles subsequent requests by another cluster node.\\
+The number of users of such web applications can vary greatly over different time intervals (eg: Twitter tends to be under heavy load upon the arrival of significant events). Also, when an appliation gains in popularity, the number of users grows quickly in a short timespan. This requires an application to be able to scale in the number of users it can serve.\\
+This project situates these concepts in the general ICT landscape and makes a detailed analysis on the importance of availability and scalability provisions on GNU/Linux server clusters.\\
+The project identifies a set of technologies that are available on the GNU/Linux platform to set up a system that can assure high availability and support proper scalability for both computational and storage nodes. The selected technologies will be tested in a simulated cluster setting.\\
+In the last phase of the project, a high-availability and scalable
+cluster simulation is constructed that mimics the functionality of
+Wikipedia.
 
-\chapter{General scope of availability and scalability}
+\section{Interest}
+A big amount of today's software applications runs on remote servers, and
+this amount will most likely grow even more in the near future. In
+order to allow users to have a good experience it is vital that the
+systems remains available at all times. For applications that only are
+used by a handfull of users, this might be an easy task by just
+providing a redundant server, however, for applications that are used
+by thousands (or millions) of concurrent users, this task becomes
+quite complex.\\
+Another aspect is that such applications need to be able to scale; a
+sudden rise in popularity may cause an application to be used by a
+x-fold of users from one day to another.\\
+These considerations of high-availability and scalability interest me
+greatly because they have a huge impact how application are
+hosted; and this again determines how such applications are to be
+implemented.\\
+ I think having an overview and understanding of the technologies and
+architectures that high-availability and scalability setups possible
+is a big asset for a computer scientist.\\
+Next to this, I have allways been fascinated by large data centers,
+while the hardware of such setups is no longer my main interest (this
+is more inclined to software these days) I still remain intrigued how
+the different components in such setups interact.
+
+\section{Relevance}
+A lot of huge companies (Google, Facebook, Microsoft, ...) and
+organisations (Wikipedia, ...) depend on available and scalable
+application. The number of companies that operate in the ``Cloud''
+seems to grow every days. Both these considerations make
+high-available and scalability solutions economically relevant.
+Also in the High Performance Computing domain high-available and
+scalability solutions become more and more important to operate huge
+research clusters. Such research clusters are essential for scientists
+and companies to do research.
+
+\chapter{General scope of high-availability and scalability}
+This project will focus on GNU/Linux clusters, however,
+the aspect of high-availability and scalability are not limited to
+this domain. In this chapter, I present a short overview of the
+importance of these aspects in other domains.
+
+\section{Airplane/car/spacecraft software}
+Cars and planes that are released are operated by millions of lines of code
+\cite{ieee_cars_and_planes}. It is of course vital in such devices
+that there is a high level of availability; important systems (breaks,
+stearing, ...) should be available in a redundant way. \\
+Another important aspect is that failure should be detected as soon as
+possible; if certain parts of a car don't function any more (or only
+partly) without the vehicle even being aware of it, a very dangerous
+situation can arise.\\
+For spacecrafts, the same rules apply when considering passenger
+safety. However, also unmanned flights, such as the mars exploration missions
+need to consider an extra dimension of availability. These vehicles
+can only be controlled by on-board computers or via a sattelite
+up-link (where signals take 1 to 1.5 hours \cite{mars_rover} to go
+from one end to the other). Needless to say, these vehicles foster a
+huge development and production cost, which is an extra motivation to
+ keep the system running as long as physically possible.
+
+\section{Healthcare}
+\subsection{Patient monitoring}
+For patient monitoring equipment, it is vital that these devices
+report problems as soon as possible. Usually these devices can be
+quickly replaced by a working unit, but now knowing that a device is
+corrupted might cost patient lives.\\
+
+\subsection{Drug development}
+As a side node, I want to mention here that for drug development both
+academic researchers and pharmaceutical company staff use High
+Performance Clusters more and more to study the effects of drugs
+\cite{deforche2007bayesian} \cite{lengauer2006bioinformatics}.
+
+\subsection{Desktop systems}
+The stability of desktop computers has improved a lot of the last decade,
+mainly by stabilizing desktop operating systems. A huge source of system
+crashes (in the past) was buggy device drivers that made the entire
+operating system crash.
+Current desktop operating systems
+(e.g.: Windows NT) are built to recover from such crashes
+\cite{windows_nt_kernel}.
+
+\subsection{Home entertainment systems}
+These appliances (TV's, game consoles, media center) are used by users via a limited interface (e.g.:
+remote controls) and users expect them to work without any problems
+(as their VCR a  couple of decades ago).\\
+While system crashes still might accepted on the desktop, this is
+definitely not the case on these kind of devices. 
+
 
 \chapter{Different aspects in cluster availability}
 \label{chap:aspects}
