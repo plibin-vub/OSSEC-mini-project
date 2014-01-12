@@ -5,6 +5,8 @@
 \documentclass[12pt]{report} 
 % Default font size is 12pt, it can be changed here
 
+\usepackage[none]{hyphenat}
+
 \usepackage{geometry} % Required to change the page size to A4
 \geometry{a4paper} % Set the page size to be A4 as opposed to the default US Letter
 
@@ -1181,7 +1183,7 @@ $HOSTNAME$ $HOSTSTATE$
 The script inform-controller simply creates a file
 $/media/sf\_ossec\_vm\_share/nodes/node1/crash$ whenever Nagios
 detects 'node1' goes down.
-Find the code for the inform-controller.sh script in src/vm_controller/inform-controller.sh.
+Find the code for the inform-controller.sh script in src/vm\_controller/inform-controller.sh.
 
 Now we need to detect the creation of the file
 $/media/sf\_ossec\_vm\_share/nodes/node1/crash$  on the controller,
