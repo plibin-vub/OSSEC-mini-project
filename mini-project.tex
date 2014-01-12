@@ -1444,7 +1444,8 @@ Then I opened port 80 on the 'haproxy' server:
 
 \subsection{HAProxy testing}
 After making the configurations as described in the previous section, I could visit the test PHP program via the
-haproxy server (IP address: 192.168.15.10); as demonstrated in \cref{fig:haproxy_working_browser}.
+haproxy server (IP address: 192.168.15.10); as demonstrated in 
+\cref{fig:haproxy_working_browser}.
 
 \begin{figure}[h!]
   \caption{Testing the haproxy setup in a browser}
@@ -1481,7 +1482,7 @@ and up-to-date, this did not cause any problems.
 I will setup a master-slave replicated MySQL database. I will use the
 'haproxy' virtual machine to act as my master database and I will
 install 2 slave databases on my 'node1' and 'node2' virtual machines.
-I use the following documentation and tutorials:
+I used the following documentation and tutorials:
 \cite{mysql_official_replication_doc}, \cite{mysql_replication_howtoforge}, \cite{mysql_replication_stackexchange}.
 
 \subsection{Installation} 
@@ -1539,8 +1540,8 @@ database:
 \begin{lstlisting}[language=bash]
 mysql -u root -p
 *type password*
-mysql> GRANT REPLICATIOn SLAVE ON *.* TO 'reppy'@''%' IDENTIFIED BY
-                                %'reppy_password';
+mysql> GRANT REPLICATIOn SLAVE ON *.* TO 'reppy'@''%' 
+       IDENTIFIED BY 'reppy_password';
 mysql> FLUSH PRIVILEGES;
 \end{lstlisting}
 The \% in this command allows the user to login from any IP address.\\
@@ -1597,9 +1598,9 @@ mysql -u root -p ossec < ossec.sql
 Next we configure the server-id and the database that is replicated in
 $/etc/mysql/my.cnf$:
 \begin{lstlisting}[language=bash]
-#node 1
+#on node 1
 server-id = 2 
-#node 2
+#on node 2
 server-id = 3
 
 #same for node 1 and 2
@@ -1614,7 +1615,8 @@ sudo /etc/init.d/mysql restart
 And execute this SQL to let the slave know where to find its master:
 \begin{lstlisting}[language=bash]
 mysql> CHANGE MASTER TO MASTER_LOG_FILE='bin.000003',
-MASTER_LOG_POS=333, MASTER_HOST='192.168.15.10', MASTER_USER='reppy', MASTER_PASSWORD='reppy_password';
+  MASTER_LOG_POS=333, MASTER_HOST='192.168.15.10', 
+  MASTER_USER='reppy', MASTER_PASSWORD='reppy_password';
 \end{lstlisting}
 Now we can start the slave:
 \begin{lstlisting}[language=bash]
@@ -1686,7 +1688,12 @@ sudo fdisk -l /dev/sdb
 \end{lstlisting}
 This command show the following report:
 \begin{lstlisting}[language=bash]
-out/fdisk-l.txt
+Disk /dev/sdb: 1073 MB, 1073741824 bytes
+255 heads, 63 sectors/track, 130 cylinders, total 2097152 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
 \end{lstlisting}
 To create a partition:
 \begin{lstlisting}[language=bash]
@@ -1704,7 +1711,15 @@ Command (m for help): w #write the partition table to disk
 \end{lstlisting}
 When running $fdisk -l$ again, we get this output:
 \begin{lstlisting}[language=bash]
-out/fdisk-l-2.txt
+Disk /dev/sdb: 1073 MB, 1073741824 bytes
+139 heads, 8 sectors/track, 1885 cylinders, total 2097152 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x1053cb0b
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sdb1            2048     2097151     1047552   83  Linux
 \end{lstlisting}
 
 Now we need to install the DRBD utilities:
@@ -1789,7 +1804,7 @@ data can safely be overiden; we use this command:
 \begin{lstlisting}[language=bash]
 sudo drbdadm invalidate r0
 \end{lstlisting}
-To make the device on 'node1' the primary divdeviceice,
+To make the device on 'node1' the primary device,
 we need to run this command on 'node1':
 \begin{lstlisting}[language=bash]
 sudo drbdadm --force primary r0
@@ -1816,7 +1831,7 @@ To test that the replication actually works, we need to:
   appear on 'node2'
 \end{itemize}
 
-I recorded a video to demonstrate this experiment:
+I recorded a video to demonstrate this experiment:\\
 https://www.youtube.com/watch?v=oMCyT1wCPmA
 
 \subsection{Conclusions and remarks}
@@ -1824,7 +1839,7 @@ The drdb service can send statistics (anonymized) to a
 server of the DRBD organisation (to get a better overview about who is
 using the software). This option is however enabled by
 default, in my opinion, this should be disabled by default
-\footnote{To disable this, we need to add the line $usage-count no;$
+\footnote{To disable this, we need to add the line ``usage-count no;''
   to the config file's global section.}.\\
 The online documentation on how to configure the software is
 up-to-date and helpful. It is a nice and interesting software, that easily allows you
@@ -1864,13 +1879,14 @@ CRUSH layer will automatically rebalance the objects over the cluster.
 Reference: \cite{ceph_developerworks}.
 
 \subsection{Installation}
+To perform this installation I used the official Ceph documentation \cite{ceph_official_doc}.
 Ceph can be installed in 2 ways: via ceph-deploy (as piece of software
 that is installed on an administrator node that automatically installs the
 necessary components on the nodes in your Ceph cluster) and a
 manual installation.
 The advantages of the first approach:
 \begin{itemize}
-\item quicker to setup
+\item it's quicker to setup
 \item commands entered on the administrative node are 
   propagated to all relevant cluster nodes (this makes upgrading nodes
   much easier)
@@ -1927,9 +1943,7 @@ directory, since it will export its output to the current directory.
 \subsubsection{Setting up the cluster}
 Now we can start configuring our cluster \footnote{The following steps are executed on the 'ceph-admin'}.
 We will configure 'ceph-node1' as a monitor node, 'ceph-node2' and
-'ceph-node-3' will be object storage daemons \cref{subsec:ceph_architecture}.
-
-cite ceph documentation
+'ceph-node-3' will be object storage daemons (see \cref{subsec:ceph_architecture}).
 
 To start a new cluster with monitor node 'ceph-node1':
 \begin{lstlisting}[language=bash]
@@ -1959,8 +1973,10 @@ named directory on the nodes. I created /opt/OSD-disk0 on ceph-node2 and
 /opt/OSD-disk1 on ceph-node3. 
 Now we can prepare and activate the OSDs:
 \begin{lstlisting}[language=bash]
-ceph-deploy osd prepare ceph-node2:/opt/OSD-disk0 ceph-node3:/opt/OSD-disk1
-ceph-deploy osd activate ceph-node2:/opt/OSD-disk0 ceph-node3:/opt/OSD-disk1
+ceph-deploy osd prepare ceph-node2:/opt/OSD-disk0 
+  ceph-node3:/opt/OSD-disk1
+ceph-deploy osd activate ceph-node2:/opt/OSD-disk0 
+  ceph-node3:/opt/OSD-disk1
 \end{lstlisting}
 
 In order to use the ceph command line tool without the need to specify
@@ -1997,11 +2013,11 @@ ceph health
 Executing this command should return ``HEALTH\_OK''.
 
 I recorded a short video that shows the different cluster nodes and
-lists the monitor and OSD nodes using the 'ceph' command: 
-https://www.youtube.com/watch?v=HjfILFBWRwA
+lists the monitor and OSD nodes using the 'ceph' command: \\
+https://www.youtube.com/watch?v=HjfILFBWRwA\\
 
 To store and retrieve an object to our cluster, we can do this with
-the rados tool \cref{subsec:ceph_architecture}. This tool allows us to
+the rados tool (see \cref{subsec:ceph_architecture}). This tool allows us to
 read/write objects respectively from/to a pool.
 Pools can be created and removed with the rados tool, when setting up
 the cluster, three pools are created automatically: data, metadata,
@@ -2017,7 +2033,7 @@ To view what is in the data pool, we can use this command:
 rados --pool=data ls
 \end{lstlisting}
 We can also request the ``physical'' location of our file, the
-so-called placement group \cref{subsec:ceph_architecture}:
+so-called placement group (see \cref{subsec:ceph_architecture}):
 \begin{lstlisting}[language=bash]
 ceph osd map data diary-text-obj
 \end{lstlisting}
@@ -2027,7 +2043,7 @@ To get our precious diary back:
 \begin{lstlisting}[language=bash]
 rados get diary-text-obj -o diary.txt --pool=data
 \end{lstlisting}
-I recorded a video that demonstrates these commands: 
+I recorded a video that demonstrates these commands: \\
 https://www.youtube.com/watch?v=1WV9o9CoIIM
 
 \subsubsection{Adding OSDs on the fly}
@@ -2042,17 +2058,15 @@ ceph-deploy osd activate ceph-node1:/opt/OSD-disk2
 \end{lstlisting}
 
 \subsection{Conclusion and remarks}
-For this experiment, I chose Ceph. Another system that offers similar
-features is GlusterFS. Both systems seem decent and I selected Ceph
-mainly because there is a better support for Ubuntu.\\
 The setup that is advised upon in the official documentation asks to
 create a user with root permissions to control the cluster nodes;
 security wise this might not be the best default to present in a tutorial.\\
 I was quite impressed with how easy it was to use ``ceph-deploy
-to install and configure the cluster. Because I was interested in why
+to install and configure the cluster. \\
+Because I was interested in why
 this installation and configuration was so easy to run over multiple
 cluster nodes, I read some more on this. I found out there are
-is another software that allow for software to be easily deployed and
+is another software that allows for software to be easily deployed and
 configured on clusters with a large amount of nodes: CHEF
 \cite{chef_soft}. Unfortunately I
 did not have the time to look into these software any more, but I
@@ -2077,7 +2091,7 @@ clean slate, is quite comforting.\\
 Ceph is a very powerful and useful piece of software, that is
 remarkably easy to setup.\\
 It has a clean architecture with different, well-separated layers.\\
-The is the ability to configure what is important: redundancy, read
+There is the ability to configure what is important: redundancy, read
 speed, write speed or a combination of these (albeit with an
 implication on the amount of hardware that will be necessary).\\
 The system also allows to make snapshots of the entire system or parts
@@ -2136,7 +2150,7 @@ CREATE TABLE post (
  FOREIGN KEY (name) REFERENCES user(name)
 );
 \end{lstlisting}
-We have a 'user' entity and each 'user' has 0 or more 'post's. Our
+We have a ``user'' entity and each ``user'' has 0 or more ``post''s. Our
 database schema allows us to cleanly partition our dataset (based on
 the user entity). A user row is stored on a specific shard, and all
 this user's posts are stored on the same shard.\\
@@ -2155,7 +2169,7 @@ mysql -u plibin -p ossec < mysql_shards_schema.sql
 \end{lstlisting}
 To create a dedicated user 'plibin' and grant this user access to our
 newly created database (from all the IP address in my local
-(VirtualBox) network):
+(VirtualBox) network), we need these commands:
 \begin{lstlisting}[language=bash]
 mysql> CREATE user 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
 mysql> GRANT ALL privileges on ossec.* TO 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
@@ -2179,7 +2193,7 @@ I grouped the aforementioned function in a command line program. All
 source code for this program can be found in src/shard/java.
 
 I ran the program on 'node1', in order to do this, I had to install
-Java (reference) and the ant build software (reference):
+Java \cite{java_soft} and the ant build software \cite{ant_soft}:
 \begin{lstlisting}[language=bash]
 apt-get install openjdk-7-jdk
 apt-get install ant
@@ -2189,10 +2203,9 @@ I also added the IP addresses of 'shard1' and 'shard2' to 'node1's
 /etc/hosts (since my program relies on hostnames, rather than IP
 addresses).
 
-The Java that I created to write this program includes a ant build
+The Java project that I created to write this program includes a ant build
 file which can be used to create a JAR-file. This JAR-file can be
-executed using the Java runtime \footnote{This java project is part of
-this my OSSEC github repository}. 
+executed using the Java runtime. 
 
 To build the source code and generate a JAR-file:
 \begin{lstlisting}[language=bash]
@@ -2259,13 +2272,13 @@ is suggested on a page on the Ceph website
 
 \subsubsection{NoSQL database}
 A natural solution for the kind of problems sharding tries to solved
-can be found using NoSQL database. Several solutions exist and I
+can be found in NoSQL databases. Several solutions exist and I
 already mentioned some of them in one of the previous sections
-\cref{sec:no_sql}.
+(see \cref{sec:no_sql}).
 I had hoped to investigate one of these systems in this project, but
 unfortunately, I did not have the time to look into this any
-more. However, this is certainly a technology that I want to further
-investigate. 
+more. However, this is certainly a technology that I want to 
+investigate further. 
 
 \chapter{Creating a `Wikpedia clone' cluster}
 Wikipedia is a highly popular free online encyclopaedia, free 
@@ -2307,7 +2320,7 @@ contains an internal link to ``Portugal'' as can be seen in
 
 Since everyone can edit any content, the submission of incorrect
 content and vandalism can be expected. In
-order to keep this under control, it is important that content can be
+order to keep this under control, it is important that content is
 versioned.
 This way, when incorrect content or vandalism is discovered, the
 version containing the problematic content can simply be removed. \\
@@ -2328,8 +2341,8 @@ A summary of statistics is available for every Wikipedia instance.
 We'll walk through the statistics summary of the English Wikipedia
 instance, note that the presented charts are copies of the Wikipedia
 statistics website \cite{stats_wikipedia}, downloaded January $7^{th}$
-2014.
-The total number of articles seems to increase linearly \cref{wikipedia_nr_articles_over_time}.
+2014.\\
+The total number of articles seems to increase linearly (see \cref{wikipedia_nr_articles_over_time}).
 \begin{figure}[h!]
   \caption{Total number of English wikipedia articles over time}
   \label{wikipedia_nr_articles_over_time}
@@ -2338,7 +2351,7 @@ The total number of articles seems to increase linearly \cref{wikipedia_nr_artic
 \end{figure}
 The amount of new articles per month seems to stay pretty much the
 same over the last 5 years, however, there were some peaks earlier in
-the history of Wikipedia.
+the history of Wikipedia (see \cref{wikipedia_nr_articles_over_time}).
 \begin{figure}[h!]
   \caption{Number of new articles per month on the English Wikipedia}
   \label{wikipedia_new_articles_per_month}
@@ -2347,8 +2360,8 @@ the history of Wikipedia.
 \end{figure}
 The number of editors stays quite stable since the beginning of 2007
 for frequent and very frequent editors. Since 2008, the number of
-infrequent also has stabilised \cref{wikipedia_active_editors}. Between 2005 and 2007 there was a
-steep growth \cref{wikipedia_active_editors}, but this growth was not
+infrequent also has stabilised (see \cref{wikipedia_active_editors}). Between 2005 and 2007 there was a
+steep growth (see \cref{wikipedia_active_editors}), but this growth was not
 that spectacular in absolute numbers:
 \begin{itemize}
 \item 5+ edits: from $\approx 5000$ editors to $\approx 45000$ editors
@@ -2364,7 +2377,7 @@ that spectacular in absolute numbers:
 The average number of edits per month is reported as $2,927,878$
 edits.
 The chart that summarises the number of page views per month shows 
-a steady growth \cref{wikipedia_page_views}. The growth in absolute
+a steady growth (see \cref{wikipedia_page_views}). The growth in absolute
 numbers is significant:
 \begin{itemize}
 \item first quarter 2008: $\approx 4500$ million
@@ -2372,7 +2385,7 @@ numbers is significant:
 \end{itemize}
 I was not able to find any statistics about page view count before
 2008, but since Wikipedia only started in 2001, with only a
-significant amount of articles since 2005 \cref{wikipedia_nr_articles_over_time}, we can assume that there
+significant amount of articles since 2005 (see \cref{wikipedia_nr_articles_over_time}), we can assume that there
 was a steep growth between 2005 and 2008.
 \begin{figure}[h!]
   \caption{Number of page views per month on the English Wikipedia}
@@ -2399,7 +2412,7 @@ steadily (linearly) once the instance gained some popularity.
 From the moment an instance is started up until the moment an
 instance gained popularity, a steep growth takes place; adding
 millions of users (viewers) to the system over a period of a few
-months/years.
+months/years.\\
 The following high-availability and scalability requirements we need to meet:
 \begin{itemize}
 \item the possibility to handle a large number of
@@ -2414,7 +2427,7 @@ The following high-availability and scalability requirements we need to meet:
 \end{itemize}
 
 \section{An attempt to setup an architecture}
-Since their is clearly a difference in requirements between viewing content and
+Since there is clearly a difference in requirements between viewing content and
 editing content, I think it would make sense to separate this
 functionality.
 
@@ -2427,13 +2440,13 @@ store this as a set of text files kept under revision control.
 This would mean that we can store all articles and their history on a
 plain file system.
 Since we are interested at the history of one file at a time, using 
-revision control such as git would a bit overkill. A more efficient
+revision control such as git is overkill. A more efficient
 approach would be to keep a directory with the name of the page and in
 this directory store a set of patch files that represents the history of the
 page.
-For this to work, we would need to write quite some code, so for the
+For this to work, we would need to write a considerable amount of code, so for the
 sake of this demonstration I will use git.
-We expect our content to be >6TB (a reasonable assumption based on
+We expect our content to be $>$6TB (a reasonable assumption based on
 the fact that it was $\approx 5TB$ in 2010). Currently there is raw
 storage hardware available that supports up to 10TB
 (\cite{hp_10TB_storage} for example), which should be
@@ -2452,11 +2465,11 @@ redundant nodes with a unified interface, so that all other servers
 can talk to this cluster as if it is only one machine.
 
 \subsection{HTTP server for editors}
-Since we only expect $\approx 2.5 edits per second$, this could be
+Since we only expect $\approx 2.5$ edits per second, this could be
 handled by one machine that hosts a web application that allows
-editing pages and communicates to the content storage server to get
-revisions and submit changes to content.
-In the case one server would no longer be able to handle the load, an
+editing pages and communicates with the content storage server \footnote{To get
+revisions and submit changes to content}.
+If one server would no longer be sufficient to handle the load, an
 additional web server could be used to setup an editor cluster, behind
 a HAProxy proxy.
 
@@ -2468,7 +2481,7 @@ We no longer store the content in a a database, but as separate file, so
 we might skip this rendering phase, and serve the files directly
 \footnote{Seperating dynamic and static content is an optimization
   technique that is also advised by W. Tarreau of HAProxy \cite{haproxy:2013}}. 
-Since we expect >2500 requests per second, we still need a cluster of
+Since we expect $>$2500 requests per second, we still need a cluster of
 HTTP servers to handle this load. We can do that by using HAProxy as a 
 front-end for our HTTP server cluster, this way, we can also easily add
 extra HTTP servers to accommodate an increase in requests.
@@ -2489,7 +2502,7 @@ To test this architecture, we'll setup the following experiment:
 \item a content storage server 
 \item a cluster of HTTP servers that can serve HTML files rendered from
 the wiktext files on the content storage server, I will use my
-existing HAProxy cluster for this \cref{ha_proxy_experiment}
+existing HAProxy cluster for this (see \cref{ha_proxy_experiment})
 \end{itemize}
 
 \subsection{The content storage server}
@@ -2553,8 +2566,10 @@ whenever the git repository receives a push.
 To add such a hook:
 \begin{lstlisting}[language=bash]
 cd /var/wiki-pages.git
-echo "ssh plibin@node1 /home/plibin/update-wiki-pages.sh" >> ./hooks/post-receive
-echo "ssh plibin@node2 /home/plibin/update-wiki-pages.sh" >> ./hooks/post-receive
+echo "ssh plibin@node1 /home/plibin/update-wiki-pages.sh" 
+  >> ./hooks/post-receive
+echo "ssh plibin@node2 /home/plibin/update-wiki-pages.sh" 
+  >> ./hooks/post-receive
 chmod +x ./hooks/post-receive
 \end{lstlisting}
 
@@ -2604,7 +2619,7 @@ To configure the web server, we simply need to make a link to our
 wiki-pages git repository in /var/www \footnote{Simply making a
   symbolic links allows the users to also see the .crl files, which is
   not our intention, this can be fixed by configuring Apache to only
-  show html file.}:
+  show HTML files.}:
 \begin{lstlisting}[language=bash]
 cd /var/www/
 sudo ln -s ~/wiki-pages/ wiki
@@ -2624,7 +2639,7 @@ wiki seems to work fine (as can be seen in \cref{fig:wikipedia_clone_1}).
 \end{figure}
 
 I recorded a video where I add another page about ``Faial'', which is
-an island in the Portuguese Azorean archipelago:
+an island in the Portuguese Azorean archipelago:\\
 https://www.youtube.com/watch?v=zk-Ny046kuw
 \\
 I recorded another short video where I add a link to Portugal on the
@@ -2633,7 +2648,7 @@ https://www.youtube.com/watch?v=T-\_baLRBBfE
 
 
 \subsection{Conclusion and remarks}
-In my opinion, my setup should be able to handle a website such as
+In my opinion, my architecture should be able to handle a website such as
 Wikipedia (although some additional developments would be
 necessary). 
 \subsubsection{Performance}
@@ -2652,7 +2667,7 @@ is however necessary for certain parts of a page (e.g.: to
 calculate the age of a person), however, most of these computations
 can also be done in JavaScript. If there would be computations that
 cannot be done in JavaScript, it would still be possible to let
-JavaScript invoke a REST service to do the computation.   
+JavaScript invoke a REST service to do this computation.   
 
 \chapter{Conclusion} % Major section
 \section{State of the art}
@@ -2661,11 +2676,9 @@ operating system that allow to build scalable and available systems.
 The quality of this software varies, but in general, most of this
 software is in good shape. \\
 I executed several experiments, and I did not run into a lot of
-bugs. However, for quite some project, the documentation was not
+bugs. However, for quite some projects, the documentation was not
 really up to date. Because of this, I often had to lookup various
 documents and tutorial.\\
-I think the GNU/Linux operating system is a very good platform to
-start from when developing scalable and available systems: 
 
 \section{What did I learn}
 I really enjoyed experimenting with these different technologies a lot. I
@@ -2680,7 +2693,7 @@ development:
 \item I wrote specific softwares to explore the development aspect of
   this domain
 \item I thought through an architecture and system design for a
-  specific real-world scenario
+  real-world scenario
 \end{itemize}
 Working through these different aspects thought me a lot about the
 domain. 
@@ -2691,7 +2704,8 @@ was really valuable for my personal and professional development.\\
 I think this project gives an overview of a lot of different aspects
 that are relevant in the domain of scalable and available
 clusters. The project provides a theoretical foundation, explores
-some of the solutions and executes real-world experiments. I tried to
+some of the solutions and executes real-world experiments.\\
+ I tried to
 thoroughly document the different steps of the experiment, to ensure
 the reader can reproduce all experiments \footnote{I thought it was
   important to be thorough in this documentation, since very often, I
