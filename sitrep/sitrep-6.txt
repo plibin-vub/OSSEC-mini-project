@@ -1,0 +1,48 @@
+Dear Professor Timmerman, Mr. Fayyad-Kazan,
+
+This mail contains my sixth bi-weekly situation report for the OSSEC mini-project.
+
+1. What did I do.
+
+07/01/2014 (11h)
+1. Read about wikipedia statistics
+2. Report wikipedia statistics
+3. Figure out an architecture based on version control
+4. Distill an experiment out of this architecture
+5. Setup a new content storage virtual machine
+6. Configure a server git repository on the content storage virtual machine
+7. Setup HTTP cluster that fetch their data from the content storage virtual machine
+8. Test setup
+9. Report all steps of the experiment.
+10. Create a video of the experiment
+
+10/01/2014 (11h)
+1. Do some basic editing of the videos (trimming).
+2. Write some theoretical support in my report.
+3. Finish some experiment sections of my report.
+
+12/01/2014 (11h)
+1. Write preface and conclusion.
+2. Edit and finish report.
+3. Create some graphics to explain the architecture of my Wikipedia experiment.
+4. Create a draft presentation.
+
+2. What will I do in the next period.
+I will spend another 5 hours to finalise my presentation for the exam.
+
+3. Problems.
+I did not run into any problems.
+
+4. Open issues.
+At this moment there are no open issues.
+
+5. Assistance
+At this moment no assistance is required.
+
+6. Other urgent matters
+None.
+
+Kind regards,
+
+Pieter Libin
+Working student "Master in Applied Informatics"
