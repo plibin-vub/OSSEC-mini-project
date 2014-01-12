@@ -199,7 +199,7 @@ academic researchers and pharmaceutical company staff use High
 Performance Clusters intensively to study the effects of drugs
 \cite{deforche2007bayesian} \cite{lengauer2006bioinformatics}.
 
-\subsection{Desktop systems}
+\section{Desktop systems}
 The stability of desktop computers has improved a lot of the last decade,
 mainly by stabilising desktop operating systems. A huge source of system
 crashes in the past were buggy device drivers that made the entire
@@ -208,7 +208,7 @@ Current desktop operating systems
 (e.g.: Windows NT) are built to recover from such crashes
 \cite{windows_nt_kernel}.
 
-\subsection{Home entertainment systems}
+\section{Home entertainment systems}
 These appliances (TV's, game consoles, media center) are used by users via a limited interface (e.g.:
 remote controls) and users expect them to work without any problems
 (as their VCR a  couple of decades ago).\\
@@ -565,7 +565,7 @@ achieved \cite{ha_book}.\\
 A more realistic goal could be 10 minutes downtime per year, this is
 expressed as an availability of 99.998\% \cite{ha_book}.
 
-\subsubsection{Expectations and realistic goals}
+\subsection{Expectations and realistic goals}
 Unavailability can cost lots of money: people of your online web shop
 might leave and look for another shop, imageinge the stock market that is not
 able to respond, ...\\
@@ -810,8 +810,8 @@ system}.
 The most interesting free software implementations I encountered were
 GlusterFS \cite{glusterfs_soft:2013} and Ceph \cite{ceph_soft:2013}.
 
-\section{Databases}
-\section{RDBMS sharding}
+\subsection{Databases}
+\subsubsection{RDBMS sharding}
 For some application, the amount of data that needs to be stored can be so high
 that it is impossible to fit it on a single cluster node. In order to
 accommodate such a large database in a relational context, database
@@ -824,7 +824,7 @@ queries that involve rows distributed over multiple cluster nodes.
 For example: an application where the data that is stored is mostly 
 private to a user (storage of emails, storage of Skype contacts, ...)
  could be sharded by the user name.
-\section{Document-oriented NoSQL databases}
+\subsubsection{Document-oriented NoSQL databases}
 \label{sec:no_sql}
 When the data that is stored is private to one user and performing
 queries over multiple users is a rare event (storage of emails,
@@ -2431,8 +2431,7 @@ Since there is clearly a difference in requirements between viewing content and
 editing content, I think it would make sense to separate this
 functionality.
 
-\subsection{A few thoughts on storing the content with all revision
-  information}
+\subsection{Storing the pages}
 Wikimedia currently stores the Wikipedia data in databases. However,
 it occurred to me that the data consists out of wikitext sections
 (representing the articles) that have a history. So we could also

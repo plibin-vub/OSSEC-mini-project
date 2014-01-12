@@ -1,6 +1,6 @@
 Dear Professor Timmerman, Mr. Fayyad-Kazan,
 
-This mail contains my sixth bi-weekly situation report for the OSSEC mini-project.
+This document contains my sixth bi-weekly situation report for the OSSEC mini-project.
 
 1. What did I do.
 
