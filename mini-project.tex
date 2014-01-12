@@ -1131,8 +1131,8 @@ and CPU load of both servers
 Now, let's see how Nagios properly detects system failure. To test
 this, we will induce a kernel panic on 'node1'; this can be achieved
 by inserting a kernel module that calls the panic() kernel function in
-its init function. I found source code to achieve this (src/panic/*)
-\cite{simulate_linux_crash}.
+its init function. I found source code to achieve this (this code can
+be found in src/panic/) \cite{simulate_linux_crash}.
 To make the kernel crash, first we need to build the module:
 \begin{lstlisting}[language=bash]
  make
@@ -1439,8 +1439,8 @@ ENABLED variable in $/etc/default/haproxy$ to $1$.
 I use the HAProxy config file that is installed with the haproxy
 Ubuntu package comes with a proper config file by default (reference
 to github).   
-In order to configure HAProxy for a specific application, I conceived
-this configuration snippet:
+In order to configure HAProxy for this specific application, I conceived
+this configuration snippet (the full config file can be found in src/haproxy/):
 \begin{lstlisting}[language=bash]
 listen ossec_app 0.0.0.0:80
         mode http
@@ -1497,9 +1497,8 @@ and up-to-date, this did not cause any problems.
 I will setup a master-slave replicated MySQL database. I will use the
 'haproxy' virtual machine to act as my master database and I will
 install 2 slave databases on my 'node1' and 'node2' virtual machines.
-\cite{mysql_official_replication_doc},
-\cite{mysql_replication_howtoforge}, 
-\cite{mysql_replication_stackexchange}, 
+I use the following documentation and tutorials:
+\cite{mysql_official_replication_doc}, \cite{mysql_replication_howtoforge}, \cite{mysql_replication_stackexchange}.
 
 \subsection{Installation} 
 I will start by installing mysql (server and client) on all the involved virtual
@@ -1560,7 +1559,7 @@ mysql> GRANT REPLICATIOn SLAVE ON *.* TO 'reppy'@''%' IDENTIFIED BY
                                 %'reppy_password';
 mysql> FLUSH PRIVILEGES;
 \end{lstlisting}
-wat doet die percent in de sql code hierboven?
+The \% in this command allows the user to login from any IP address.\\
 
 To get the information to configure the slave, we need to execute these
 commands to select our database 'ossec' and lock all the tables in it:
@@ -1646,7 +1645,7 @@ mysql\_replication.mov).
 
 \subsection{Conclusion and remarks}
 Setting up a replicated MySQL environment was not easy, mainly since I
-had to consult several separate documents. The main problem seems to
+had to consult several separate documents (\cite{mysql_official_replication_doc}, \cite{mysql_replication_howtoforge}, \cite{mysql_replication_stackexchange}). The main problem seems to
 be that the way things are configured in MySQL seems to change significantly
 over time. Several settings I found in different tutorials, were no
 longer supported on the most recent MySQL package distributed with
@@ -1664,12 +1663,10 @@ system on 2 nodes, for this I will use the software DRBD
 (Distributed Replicated Block Device) \cite{drbd_soft:2013}.
 I will create a disk (virtual machine disk) of 1GB on my virtual
 machines 'node1' and 'node2' (since we're using RAID, it is vital that
-these disks have the exact same size).
+these disks have the exact same size).\\
 
-reference: 
-http://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-ubuntu-11.10-p2
-\cite{drbd_ubuntu_doc}
-\cite{drbd_official_doc}
+I used the following documentation and tutorials:
+\cite{drbd_ubuntu_doc}, \cite{drbd_official_doc}, \cite{drbd_howtoforge}.
 
 \subsection{Adding the ``disks''}
 Firstly, I will add a disk to my virtual machines 'node1' and
@@ -1734,7 +1731,42 @@ sudo modprobe drbd
 We can configure these nodes with the following configuration file
 (based on: \cite{drbd_ubuntu_doc} \cite{drbd_official_doc}):
 \begin{lstlisting}[language=bash]
-src/drbd/drbd.conf
+global {
+       	#do NOT participate in DRBD's online usage counter:
+       	#explicitely disable this, and also disable that we are
+       	#asked for this on every restart of the drbd daemon
+       	usage-count no;
+}
+resource r0 {
+	net {
+                #one of the 3 possible protocols: A, B, C
+                #see documentation for details
+		protocol C;
+                #specifies the HMAC algorithm (see Appendix)
+                #to enable peer authentication
+		cram-hmac-alg sha1;
+                #secret used in peer authentication
+		shared-secret "testing";
+	}
+	on node1 {
+		volume 0 {
+			#the new device we configure
+			device    /dev/drbd0;
+			disk      /dev/sdb1;
+			meta-disk internal;
+		}
+		address   192.168.15.4:7789;
+	}
+	on node2 {
+		volume 0 {
+			#the new device we configure
+			device    /dev/drbd0;
+			disk      /dev/sdb1;
+			meta-disk internal;
+		}
+		address   192.168.15.8:7789;
+	}
+}
 \end{lstlisting}
 Most of the configuration items are straightforward, I commented the
 other elements to clarify their meaning.
@@ -1752,14 +1784,6 @@ sudo /etc/init.d/drbd restart
 
 First I started the daemon on 'node1', the daemon waited until the
 daemon I brought the daemon on 'node2' online.
-
-\subsection{Conclusions and remarks}
-When starting the drdb service, you need to specify
-whether you want the software to send statistics (anonymized) to a
-server of the DRBD organisation. -> not sure what to think about this
-To disable this, we need to add the line $usage-count no;$ to the config file's
-global section.
-I recorded a short video that demonstrates this: start\_drbd.mov.
 
 Now we configured the mirrored device $/dev/drbd0$, but we can't use
 this device yet.
@@ -1803,15 +1827,17 @@ To test that the replication actually works, we need to:
 \item check that the files we placed on the device from 'node1' also
   appear on 'node2'
 \end{itemize}
+
 I created a video to demonstrate and test this scenario:
 test\_drbd.mov.
 
 \subsection{Conclusions and remarks}
-When starting the drdb service, you need to specify
-whether you want the software to send statistics (anonymized) to a
-server of the DRBD organisation. -> not sure what to think about this
-To disable this, we need to add the line $usage-count no;$ to the config file's
-global section.
+The drdb service can send statistics (anonymized) to a
+server of the DRBD organisation (to get a better overview about who is
+using the software). This option is however enabled by
+default, in my opinion, this should be disabled by default
+\footnote{To disable this, we need to add the line $usage-count no;$
+  to the config file's global section.}.\\
 The online documentation on how to configure the software is
 up-to-date and helpful. It is a nice and interesting software, that easily allows you
 to setup replication between data centers on block level.
@@ -1828,12 +1854,26 @@ the distributed object storage component.
 
 \subsection{Architecture}
 \label{subsec:ceph_architecture}
-Discuss architecture: 
-\begin{itemize}
-\item developerWorks article (printed):
-  http://www.ibm.com/developerworks/library/l-ceph/
-\item http://www.anchor.com.au/wp-content/uploads/2012/09/ceph\_stack.png
-\end{itemize}
+Ceph has a layered architecture as demonstrated in
+\ref{fig:ceph_architecture} \cite{ceph_architecture}.
+
+\begin{figure}[h!]
+  \caption{Ceph archtitecture}
+  \label{fig:ceph_architecture}
+  \centering
+    \includegraphics[width=0.5\textwidth]{pics/ceph_archtecture.png}
+\end{figure}
+
+The RADOS layer allows for client software to use the cluster
+infrastructure  (file systems, key value stores,... ). This layer
+communicates with the cluster pool via the CRUSH layer; which
+distributes objects over the different nodes in the cluster, and makes
+sure that they can be fetched optimally. \\
+They architecture allows for easy scaling since nodes can be added and
+removed while the system is running. When such an event occurs the
+CRUSH layer will automatically rebalance the objects over the cluster.
+
+Reference: \cite{ceph_developerworks}.
 
 \subsection{Installation}
 Ceph can be installed in 2 ways: via ceph-deploy (as piece of software
@@ -2011,16 +2051,22 @@ ceph-deploy osd prepare ceph-node1:/opt/OSD-disk2
 ceph-deploy osd activate ceph-node1:/opt/OSD-disk2
 \end{lstlisting}
 
-\subsubsection{Setting up the Ceph FileSystem}
-In order to setup the file system ... need to install something
-more...
-simply goes on top of the Cluster Storage system
-
 \subsection{Conclusion and remarks}
-ceph or glusterfs: seems to be pretty much the same, ceph backed by
-ubuntu, maybe easier to  configure on ubuntu?
-security: root ceph user???
-ceph-deploy install -> works very well, quite impressive
+For this experiment, I chose Ceph. Another system that offers similar
+features is GlusterFS. Both systems seem decent and I selected Ceph
+mainly because there is a better support for Ubuntu.\\
+The setup that is advised upon in the official documentation asks to
+create a user with root permissions to control the cluster nodes;
+security wise this might not be the best default to present in a tutorial.\\
+I was quite impressed with how easy it was to use ``ceph-deploy
+to install and configure the cluster. Because I was interested in why
+this installation and configuration was so easy to run over multiple
+cluster nodes, I read some more on this. I found out there are
+is another software that allow for software to be easily deployed and
+configured on clusters with a large amount of nodes: CHEF
+\cite{chef_soft}. Unfortunately I
+did not have the time to look into these software any more, but I
+think they are very interesting to experiment with.\\
 Because of the bug I ran into \cite{ceph_bug_1}, I had to redo the
 installation quite a few time, to figure out a solution for the
 problem.
@@ -2033,18 +2079,19 @@ ceph-deploy purgedata ceph-admin ceph-node1 ceph-node2 ceph-node3
 ceph-deploy forgetkeys ceph-admin ceph-node1 ceph-node2 ceph-node3
 \end{lstlisting}
 Note that the purge command is not mentioned in the documentation, but
-this seems to be important as well!
-Of course it would be nice that the installation procedure did not have any bug
-at all; however knowing that you can safely screw thing up and return to a
-clean slate, is quite comforting.
-Very powerful software
-remarkably easy to setup
-clean architecture (different layers)
-able to configure what is important, redundancy, speed to read/write 
-possibility to make snapshots
-Although this software does a lot of things (nicely separate libraries
-per layer), since it is open source software, it is still possible to
-review what is going on.
+this is important as well!
+Of course it would be nice that the installation procedure did not have any bugs
+at all; however knowing that you can safely screw things up and return to a
+clean slate, is quite comforting.\\
+\subsubsection{Summary}
+Ceph is a very powerful and useful piece of software, that is
+remarkably easy to setup.\\
+It has a clean architecture with different, well-separated layers.\\
+The is the ability to configure what is important: redundancy, read
+speed, write speed or a combination of these (albeit with an
+implication on the amount of hardware that will be necessary).\\
+The system also allows to make snapshots of the entire system or parts
+of the system.
 
 \section{Database shards experiment}
 Horizontal scaling in RDBMs is quite involved and their are different
@@ -2087,7 +2134,17 @@ sudo ufw allow 3306/tcp
 I will use this simple database schema to represent a user in my
 application:
 \begin{lstlisting}[language=bash]
-src/mysql_shard_schema.sql
+CREATE TABLE user (
+ name VARCHAR(100) UNIQUE NOT NULL, 
+ PRIMARY KEY (name)
+);
+CREATE TABLE post (
+ id INT NOT NULL AUTO_INCREMENT,
+ message TEXT NOT NULL,
+ name VARCHAR(100) NOT NULL,
+ PRIMARY KEY (id),
+ FOREIGN KEY (name) REFERENCES user(name)
+);
 \end{lstlisting}
 We have a 'user' entity and each 'user' has 0 or more 'post's. Our
 database schema allows us to cleanly partition our dataset (based on
@@ -2128,8 +2185,8 @@ I wrote functions to allow for the following functionality:
 \item get the posts of a specific user
 \end{itemize}
 
-I grouped the aforementioned function in a command line program.
-Reference to github for the source code.
+I grouped the aforementioned function in a command line program. All
+source code for this program can be found in src/shard/java.
 
 I ran the program on 'node1', in order to do this, I had to install
 Java (reference) and the ant build software (reference):
@@ -2149,7 +2206,7 @@ this my OSSEC github repository}.
 
 To build the source code and generate a JAR-file:
 \begin{lstlisting}[language=bash]
-cd shards
+cd shards/java
 ant
 \end{lstlisting}
 
@@ -2175,7 +2232,7 @@ java -jar dist/shard-test.jar users-that-posted-pattern plibin
 I recorded a movie to demonstrate this program: mov/shards-*.mov.
 
 \subsection{Conclusion and remarks}
-Setting up a sharded database environment is quite involved, I only
+Setting up a sharded database environment is quite involved; for this experiment I only
 looked at the application side of the problem. There are much more
 aspects to it: rebalancing your shards, adding new shards, ....
 The application that I conceived is a small experiment, but it clearly
@@ -2183,10 +2240,10 @@ shows some important aspects of handling shards from an application
 point of view as well as from the database instance point of view.
 The nice things about this example is that several instances of the
 application could run simultaneous without any modifications of the
-program.
+program.\\
 Implementing parallel queries (parallel in a sense that the query is
 executed simultaneous on the different queries) could be done without
-much efforts (if still time, implement this).
+much effort.
 
 \subsection{Additional thoughts}
 \subsubsection{Libraries for application sharding}
@@ -2210,7 +2267,7 @@ is suggested on a page on the Ceph website
 \subsubsection{NoSQL database}
 A natural solution for the kind of problems sharding tries to solved
 can be found using NoSQL database. Several solutions exist and I
-already discussed some in one of the previous sections
+already mentioned some of them in one of the previous sections
 \ref{sec:no_sql}.
 I had hoped to investigate one of these systems in this project, but
 unfortunately, I did not have the time to look into this any
@@ -2218,9 +2275,6 @@ more. However, this is certainly a technology that I want to further
 investigate. 
 
 \chapter{Creating a `Wikpedia clone' cluster}
-interesting hints to improve performance: Tarreau:2006 article: p
-17-18 (printed)
-
 Wikipedia is a highly popular free online encyclopaedia, free 
 as in ``free beer'', but also and maybe more importantly as in ``free
 speech'' (text is contributed to wikipedia under the GNU Free
@@ -2413,12 +2467,14 @@ In the case one server would no longer be able to handle the load, an
 additional web server could be used to setup an editor cluster, behind
 a HAProxy proxy.
 
-\subsection{HTTP server for editors}
+\subsection{HTTP server for viewers}
 The current implementation of Wikipedia serves the content to viewers
 using the MediaWiki software, which is PHP software that has to render
 the pages on the server side before it can serve them to the user.
 We no longer store the content in a a database, but as separate file, so
-we might skip this rendering phase, and serve the files directly.
+we might skip this rendering phase, and serve the files directly
+\footnote{Seperating dynamic and static content is an optimization
+  technique that is also advised by W. Tarreau of HAProxy \cite{haproxy:2013}}. 
 Since we expect >2500 requests per second, we still need a cluster of
 HTTP servers to handle this load. We can do that by using HAProxy as a 
 front-end for our HTTP server cluster, this way, we can also easily add
@@ -2575,14 +2631,79 @@ wiki seems to work fine (as can be seen in \ref{fig:wikipedia_clone_1}).
 \end{figure}
 
 I recorded a movie where I add another page about ``Faial'', which is
-an island in the Portuguese Azorean archipelago (movies/wikipedia\_clone\_add\_faial.mov).
+an island in the Portuguese Azorean archipelago
+(movies/wikipedia\_clone\_add\_faial.mov).
+
+\subsection{Conclusion and remarks}
+In my opinion, my setup should be able to handle a website such as
+Wikipedia (although some additional developments would be
+necessary). 
+\subsubsection{Performance}
+When looking at some benchmarks
+(\cite{web_server_benchmarks}); if we expect 2500 requests per second,
+we would only need a couple of servers to handle this. Other web
+servers such as lighthttpd and nginx seem to do event better with
+static content. \\
+However, to make any serious claims about the amount of servers that
+would be needed, we need to perform a large-scale performance test,
+which is out of the scope of this experiment.
+\subsubsection{Simplifications}
+I had to make some simplifications in my setup; the most important one
+being that there is no support for any dynamic content in the pages. This
+is however necessary for certain parts of a page (e.g.: to
+calculate the age of a person), however, most of these computations
+can also be done in JavaScript. If there would be computations that
+cannot be done in JavaScript, it would still be possible to let
+JavaScript invoke a REST service to do the computation.   
 
 \chapter{Conclusion} % Major section
-\section{What is lacking}
-The ability to replicate journaled filesystems (by using the journal),
-like in MS DPM.
+\section{State of the art}
+There exist tons of open-source softwares developed for the GNU/Linux 
+operating system that allow to build scalable and available systems.
+The quality of this software varies, but in general, most of this
+software is in good shape. \\
+I executed several experiments, and I did not run into a lot of
+bugs. However, for quite some project, the documentation was not
+really up to date. Because of this, I often had to lookup various
+documents and tutorial.\\
+I think the GNU/Linux operating system is a very good platform to
+start from when developing scalable and available systems: 
 
+\section{What did I learn}
+I really enjoyed experimenting with these different technologies a lot. I
+learned a lot how these technologies work (architecture-wise) and how
+they can be installed and used.\\
+I covered several aspects of scalable and available system design and
+development: 
+\begin{itemize}
+\item I studied existing technologies and their architecture
+\item I installed and configured existing technologies in a simulated
+  environment (virtualised cluster)
+\item I wrote specific softwares to explore the development aspect of
+  this domain
+\item I thought through an architecture and system design for a
+  specific real-world scenario
+\end{itemize}
+Working through these different aspects thought me a lot about the
+domain. 
 
+\section{What does this project contribute}
+First of all, I learned a huge amount by executing this project, so it
+was really valuable for my personal and professional development.\\
+I think this project gives an overview of a lot of different aspects
+that are relevant in the domain of scalable and available
+clusters. The project provides a theoretical foundation, explores
+some of the solutions and executes real-world experiments. I tried to
+thoroughly document the different steps of the experiment, to ensure
+the reader can reproduce all experiments \footnote{I thought it was
+  important to be thorough in this documentation, since very often, I
+  had to consult many different tutorials. I hope this document can
+  act as a starting point for executing similar experiments,
+  alleviating the need to browse through tons of different
+  documentation files.}. When documenting these steps
+I often based my work on tutorials and documentation that I found
+online or in books, I always tried to accurately reference to these
+documents to avoid any plagiarism.
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
