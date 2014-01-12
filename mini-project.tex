@@ -104,6 +104,8 @@ Before the presentation, I will hand in the following deliverables:
 \item the base ubuntu virtual machine, which I used to derive all
   other virtual machines from (root-password=''empty'', root-user=''plibin'')
 \end{itemize}
+During the presentation, I will present some videos that depict
+experiments that I executed (most of the videos in the deliverable).
 
 \chapter{Introduction} % Major section
 \section{Abstract}
@@ -924,7 +926,7 @@ configured as shown in ~\cref{fig:vbox_network_config}.
   \caption{VirtualBox network configuration.}
   \label{fig:vbox_network_config}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/vbox_network_config.png}
+    \includegraphics[scale=0.3]{pics/vbox_network_config.png}
 \end{figure}
 
 
@@ -974,7 +976,7 @@ depicted in \cref{fig:nagios_1}.
   \caption{Nagios start page, immediately after installation.}
   \label{fig:nagios_1}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/nagios_1.png}
+    \includegraphics[scale=0.3]{pics/nagios_1.png}
 \end{figure}
 
 I cloned another pair of servers: node1 and node2, that will serve as
@@ -1113,7 +1115,7 @@ on the CPU load of 'node1' as depicted in
   \caption{Nagios showing the ``Check load'' service}
   \label{fig:nagios_nrpe_working_check_load}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/nagios_2.png}
+    \includegraphics[scale=0.3]{pics/nagios_2.png}
 \end{figure}
 
 To do some more involved tests, I added a new node (which I called
@@ -1128,7 +1130,7 @@ and CPU load of both servers
   \caption{Nagios showing both nodes}
   \label{fig:nagios_nrpe_also_node2}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/nagios_3.png}
+    \includegraphics[scale=0.3]{pics/nagios_3.png}
 \end{figure}
 
 Now, let's see how Nagios properly detects system failure. To test
@@ -1149,7 +1151,7 @@ This immediately causes a kernel panic \cref{fig:kernel_panic}.
   \caption{'node1' experiencing a kernel panic}
   \label{fig:kernel_panic}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/kernel_panic.png}
+    \includegraphics[scale=0.4]{pics/kernel_panic.png}
 \end{figure}
 After about one minute, this failure was detected by nagios, and the
 user interface depicted a ``Critical error'' \cref{fig:nagios_after_kernel_panic}.
@@ -1158,7 +1160,7 @@ user interface depicted a ``Critical error'' \cref{fig:nagios_after_kernel_panic
   \caption{Nagios showing a critical error after a kernel panic}
   \label{fig:nagios_after_kernel_panic}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/nagios_after_kernel_panic.png}
+    \includegraphics[scale=0.3]{pics/nagios_after_kernel_panic.png}
 \end{figure}
 
 If a node experiences a system failure, it is useful when an action is
@@ -1311,7 +1313,7 @@ shows a general overview \cref{fig:ganglia_general}.
   \caption{Ganglia's general overview}
   \label{fig:ganglia_general}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/ganglia_general.png}
+    \includegraphics[scale=0.3]{pics/ganglia_general.png}
 \end{figure}
 All configured nodes were detected, and an overview of the CPU load of
 all 3 nodes was visible on the bottom of the Ganglia's web application
@@ -1320,7 +1322,7 @@ start page  \cref{fig:ganglia_node_overview}.
   \caption{Ganglia's node overview}
   \label{fig:ganglia_node_overview}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/ganglia_node_overview.png}
+    \includegraphics[scale=0.3]{pics/ganglia_node_overview.png}
 \end{figure}
 I've started nagios\_app (reference to the previous section) on 'node1'
 (IP=192.168.15.4) to put the node under heavy load. This clearly is
@@ -1429,7 +1431,7 @@ program: \ref{fig:test_php_working}.
   \caption{Test PHP program working in a browser}
   \label{fig:test_php_working}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/test_php_working.png}
+    \includegraphics[scale=0.3]{pics/test_php_working.png}
 \end{figure}
 
 To install HAProxy:
@@ -1469,7 +1471,7 @@ haproxy server (IP address: 192.168.15.10); as demonstrated in \ref{fig:haproxy_
   \caption{Testing the haproxy setup in a browser}
   \label{fig:haproxy_working_browser}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/haproxy_working_browser.png}
+    \includegraphics[scale=0.3]{pics/haproxy_working_browser.png}
 \end{figure}
 
 When testing this setup, it becomes clear that HAProxy forwards the
@@ -1680,7 +1682,7 @@ virtual machines are powered off \ref{fig:add_disk_vbox}.
   \caption{Added a disk to one of the virtual machines}
   \label{fig:add_disk_vbox}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/add_disk_vbox.png}
+    \includegraphics[scale=0.3]{pics/add_disk_vbox.png}
 \end{figure}
 
 \subsection{Setting up the network RAID-1}
@@ -1864,7 +1866,7 @@ Ceph has a layered architecture as demonstrated in
   \caption{Ceph archtitecture}
   \label{fig:ceph_architecture}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/ceph_architecture.png}
+    \includegraphics[scale=0.3]{pics/ceph_architecture.png}
 \end{figure}
 
 The RADOS layer allows for client software to use the cluster
@@ -2312,7 +2314,7 @@ contains an internal link to ``Portugal'' as can be seen in
     red: a free-link to ``Portugal'')}
   \label{fig:lisbon_wikipedia}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_lisbon.png}
+    \includegraphics[scale=0.2]{pics/wikipedia_lisbon.png}
 \end{figure}
 
 Since everyone can edit any content, the submission of incorrect
@@ -2344,7 +2346,7 @@ The total number of articles seems to increase linearly \ref{wikipedia_nr_articl
   \caption{Total number of English wikipedia articles over time}
   \label{wikipedia_nr_articles_over_time}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_nr_articles_over_time.png}
+    \includegraphics[scale=0.5]{pics/wikipedia_nr_articles_over_time.png}
 \end{figure}
 The amount of new articles per month seems to stay pretty much the
 same over the last 5 years, however, there were some peaks earlier in
@@ -2353,7 +2355,7 @@ the history of Wikipedia.
   \caption{Number of new articles per month on the English Wikipedia}
   \label{wikipedia_new_articles_per_month}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_new_articles_per_month.png}
+    \includegraphics[scale=0.5]{pics/wikipedia_new_articles_per_month.png}
 \end{figure}
 The number of editors stays quite stable since the beginning of 2007
 for frequent and very frequent editors. Since 2008, the number of
@@ -2369,7 +2371,7 @@ that spectacular in absolute numbers:
   \caption{Active editors on the English Wikipedia}
   \label{wikipedia_active_editors}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_active_editors.png}
+    \includegraphics[scale=0.5]{pics/wikipedia_active_editors.png}
 \end{figure}
 The average number of edits per month is reported as $2,927,878$
 edits.
@@ -2388,7 +2390,7 @@ was a steep growth between 2005 and 2008.
   \caption{Number of page views per month on the English Wikipedia}
   \label{wikipedia_page_views}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_page_views.png}
+    \includegraphics[scale=0.5]{pics/wikipedia_page_views.png}
 \end{figure}
 There were statistics about the growth of the Wikipedia database
 \cite{wikipedia_database_growth}, but these statistics seem to be
@@ -2630,7 +2632,7 @@ wiki seems to work fine (as can be seen in \ref{fig:wikipedia_clone_1}).
     IP-address 192.168.15.10)}
   \label{fig:wikipedia_clone_1}
   \centering
-    \includegraphics[width=0.5\textwidth]{pics/wikipedia_clone_1.png}
+    \includegraphics[scale=0.2]{pics/wikipedia_clone_1.png}
 \end{figure}
 
 I recorded a movie where I add another page about ``Faial'', which is
