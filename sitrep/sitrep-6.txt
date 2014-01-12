@@ -22,8 +22,8 @@ This document contains my sixth bi-weekly situation report for the OSSEC mini-pr
 3. Finish some experiment sections of my report.
 
 12/01/2014 (11h)
-1. Write preface and conclusion.
-2. Edit and finish report.
+1. Write a preface and conclusion.
+2. Edit and finish the report.
 3. Create some graphics to explain the architecture of my Wikipedia experiment.
 4. Create a draft presentation.
 
