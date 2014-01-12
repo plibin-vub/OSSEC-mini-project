@@ -74,26 +74,6 @@ Mr. Fayyad-Kazan
 
 \end{titlepage}
 
-\newcounter{treeline}
-
-\newcommand{\treeroot}[1]{% Title
-\node[above] at (0,0) {#1};%
-\setcounter{treeline}{0}
-}
-
-\newcommand{\treeentry}[2]{% Title, Level
-\draw[->] (#2-1,-\value{treeline}/2) -- (#2-1,-\value{treeline}/2-0.5) -- (#2+0.5,-\value{treeline}/2-0.5) node[right] {#1};
-\stepcounter{treeline}
-}
-
-\newcommand{\altentry}[2]{% Title, Level
-\draw[->] (#2-1,-\value{treeline}/2) -- (#2-1,-\value{treeline}/2-0.5) -- (#2+0.5,-\value{treeline}/2-0.5) node[right] {#1};
-\foreach \x in {1,...,#2}
-{   \draw (\x-1,-\value{treeline}/2) -- (\x-1,-\value{treeline}/2-0.5);
-}
-\stepcounter{treeline}
-}
-
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
 %----------------------------------------------------------------------------------------
