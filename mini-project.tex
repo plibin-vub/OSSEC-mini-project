@@ -114,7 +114,7 @@ experiments that I executed (most of the videos in the deliverable).
 \chapter{Introduction} % Major section
 \section{Abstract}
 Nowadays, several web-applications exist (Facebook, Wikipedia, Twitter, ...) that serve millions of users concurrently. To achieve this, huge clusters are in place, where each cluster node serves a large amount of users. In order to assure the availability of such applications, it is required that whenever a cluster node crashes, the systems remains responsive and handles subsequent requests by another cluster node.\\
-The number of users of such web applications can vary greatly over different time intervals (e.g.: Twitter tends to be under heavy load upon the arrival of significant events). Also, when an application gains in popularity, the number of users grows quickly in a short timespan. This requires an application to be able to scale in the number of users it can serve.\\
+The number of users of such web applications can vary greatly over different time intervals (e.g.: Twitter tends to be under heavy load upon the arrival of significant events). Also, when an application gains in popularity, the number of users grows quickly in a short timespan. This requires an application to be able to scale the number of users it can serve.\\
 This project situates these concepts in the general ICT landscape and makes a detailed analysis on the importance of availability and scalability provisions on GNU/Linux server clusters.\\
 The project identifies a set of technologies that are available on the GNU/Linux platform to set up a system that can assure high availability and support proper scalability for both computational and storage nodes. The selected technologies will be tested in a simulated cluster setting.\\
 In the last phase of the project, a high-availability and scalable
@@ -122,33 +122,33 @@ cluster simulation is constructed that mimics the functionality of
 Wikipedia.
 
 \section{Interest}
-A big amount of today's software applications runs on remote servers, and
+A large amount of today's software applications runs on remote servers, and
 this amount will most likely grow even more in the near future. In
 order to allow users to have a good experience, it is vital that the
-application remains available at all times. For applications that only are
+application remains available at all times. For applications that are only
 used by a handful of users, this might be an easy task by just
 providing a redundant server, however, for applications that are used
-by thousands (or millions) of concurrent users, this task becomes
+by thousands (or millions) of concurrent users, this becomes
 quite complex.\\
 Another aspect is that such applications need to be able to scale; a
 sudden rise in popularity may cause an application to be used by a
 x-fold of users from one day to another.\\
 These considerations of high-availability and scalability interest me
-greatly because they have a huge impact how application are
+greatly because they have a huge impact on how applications are
 hosted; and this again determines how such applications are to be
 implemented.\\
 In my opinion, having an overview and understanding of the technologies and
 architectures that high-availability and scalability setups use,
 is a big asset for a computer scientist.\\
-Next to this, I have always been fascinated by large data centers,
+I have always been fascinated by large data centers,
 while the hardware of such setups is no longer my main interest (this
 is more inclined to software these days) I still remain intrigued how
 the different components in such setups interact.
 
 \section{Relevance}
-A lot of huge companies (Google, Facebook, Microsoft, ...) and
+Many huge companies (Google, Facebook, Microsoft, ...) and
 organisations (Wikipedia, ...) depend on available and scalable
-application \footnote{And the number of companies that operate in the
+applications \footnote{And the number of companies that operate in the
   ``Cloud'' seems to grow every days}. This makes
 high-available and scalability solutions economically relevant.
 Also in the High Performance Computing domain high-available and
@@ -169,8 +169,7 @@ Cars and planes that are released today are operated by millions of lines of cod
 that there is a high level of availability; important systems (breaks,
 steering, ...) should be available in a redundant way. \\
 Another important aspect is that failure should be detected as soon as
-possible; if certain parts of a car don't function any more (or only
-partly) without the vehicle being aware of this, a very dangerous
+possible; if certain parts of a car break down without the vehicle being aware of this, a very dangerous
 situation can arise.\\
 For spacecrafts, the same rules apply when considering passenger
 safety. However, also unmanned flights, such as the mars exploration missions
@@ -190,17 +189,17 @@ power and can benefit from the use of High Performance Clusters
 \subsection{Patient monitoring}
 For patient monitoring equipment, it is vital that these devices
 report problems as soon as possible. Usually these devices can be
-quickly replaced with a working unit, but now knowing that a device is
+quickly replaced with a working unit, but not knowing that a device is
 corrupted might cost patient lives.\\
 
 \subsection{Drug development}
-As a side node, I want to mention here for drug development both
+For drug development both
 academic researchers and pharmaceutical company staff use High
 Performance Clusters intensively to study the effects of drugs
 \cite{deforche2007bayesian} \cite{lengauer2006bioinformatics}.
 
 \section{Desktop systems}
-The stability of desktop computers has improved a lot of the last decade,
+The stability of desktop computers has improved a lot the last decade,
 mainly by stabilising desktop operating systems. A huge source of system
 crashes in the past were buggy device drivers that made the entire
 operating system crash.
@@ -209,11 +208,11 @@ Current desktop operating systems
 \cite{windows_nt_kernel}.
 
 \section{Home entertainment systems}
-These appliances (TV's, game consoles, media center) are used by users via a limited interface (e.g.:
+These appliances (TV's, game consoles, media center) are used via a limited interface (e.g.:
 remote controls) and users expect them to work without any problems
 (as their VCR a  couple of decades ago).\\
-While system crashes still might accepted on the desktop, this is
-definitely not the case on these kind of devices. 
+While system crashes might still be acceptable on the desktop, this is
+definitely not the case with these kind of devices. 
 
 
 \chapter{Different aspects in cluster availability}
@@ -224,7 +223,7 @@ Servers are the processing nodes in a cluster, they contain a CPU
 (often more than one), memory (often a significant amount), one or
 more network interfaces, a power supply (often 2 for redundancy) and
 usually one or more hard disks.\\
-Several server-cases exists:
+Several server-cases exist:
 \subsubsection{Tower server} 
 A tower server is comparable to a desktop PC tower. It's cheap, but it is
   an inconvenient format to use in cluster rooms.
@@ -247,9 +246,8 @@ Several components are used to setup cluster networks:
 \item firewalls
 \end{itemize}
 \subsection{Storage}
-Storage can be integrated in a server. There 
-also exists solutions that implement storage that can be directly
-integrated in the network:
+Storage can be integrated in a server. Solutions exist for implementing storage that can be 
+integrated directly in the network:
 \begin{itemize}
 \item network attached storage 
 \item storage area network
@@ -257,14 +255,14 @@ integrated in the network:
 There are also separate units that can be connected to a server
 directly (with no network in between) : direct-attached storage.
 \subsubsection{Disk types}
-There currently exist two types of disks: hard disk drives (HDDs) and
+Currently, two types of disks exist: hard disk drives (HDDs) and
 solid state disks (SSDs). A HDD contains rotating platters and 
 stores data by magnetising parts of the disk. An SSD is fully
 implemented in an integrated electronic circuit; it contains no moving
 parts at all (comparable to a USB flash drive).\\
 Overall, SSDs (which are only ``recently'' on the market) have a much better
 performance. However, traditional HDDs still offer a much better
-price/MB ratio than SSDs do.\\
+price/MB ratio than SSDs.\\
 Therefore the choice of using HDDs or SSDs usually depends on the
 problem you want to solve: quickly accessing a limited amount of data
 vs storing vast amounts of data that are only issued
@@ -273,12 +271,12 @@ so the technologies can complement each other}.
 
 \section{Infrastructure}
 \subsection{Sites}
-Big companies such as Google, Facebook, Microsoft, ... have there own
+Big companies such as Google, Facebook, Microsoft, ... have their own
 sites to host their clusters. Smaller companies often start by hosting
-their applications at a third party's site. Some of this third party
-providers offer servers that are can be completely administered by their
+their applications at a third party's site. Some of these third party
+providers offer servers that can be completely administered by their
 users (e.g.: rackspace \cite{rackspace}, Amazon EC2 \cite{amazon_ec2}), others provide cloud
-platforms that allows the users to simply install an application
+platforms that allow the users to simply install an application
 (e.g.: Google App Engine \cite{google_app_engine}).
 
 \subsection{Location}
@@ -315,7 +313,7 @@ the data center to consume dramatically less power \cite{passive_architecture}.
 \subsection{Energy providers}
 \label{energy_provider}
 Data centers might produce their own power on-site by
-using solar panels on the top of the roofs or even building a dedicated
+using solar panels or even building a dedicated
 power plant.\\
 It should be taken under consideration whether a country / region has
  trustworthy energy providers (which can be a problem in development 
@@ -324,7 +322,7 @@ A company will negotiate a contract that guarantees the availability of power
 within a reasonable degree of certainty.\\
 The datacenter should be able to handle short power-outs by using
 UPSs. To deal with longer power-outs diesel-powered generators can be used.\\
-Considering climate change, the cost of energy might rise
+Considering climate change, the cost of energy could rise
 significantly over the next years, rendering these aspects even more important.
 
 \section{Internet Availability}
@@ -402,10 +400,10 @@ implemented on top of the NoSQL database (doing this might still
 be slow \cite{nosql_problems}). \\
 
 \section{Application crashes}
-Software will never be perfect, therefore there will always be a
-chance that a program crashes. Important is that developers try to
-create defensive software, that rather than to crash will show an
-appropriate error message.\\
+Software will never be perfect, therefore there will always be the possibility
+that a program crashes. Important is that developers try to
+create defensive software, that will show an
+appropriate error message, rather than crash.\\
 That said, since we cannot built a high-availability cluster assuming
 our software will not crash, we need to try to contain the crashes as
 good as possible.\\
@@ -474,7 +472,7 @@ by restarting the cluster node that has crashed or (if the crashed
 node cannot be started again) by starting a new node that will take
 the crashed node's place.\\
 When a crash happens, it is essential to investigate what went wrong,
-so lessons can be learned and actions can be takes to avoid the
+so lessons can be learned and actions can be taken to avoid the
 problem from happening again.
 
 \section{Monitoring}
@@ -554,7 +552,7 @@ aware of this and write applications in a defensive way.
   goals}
 \subsection{Definition of high availability}
 I use the definition used in \cite{ha_book}:\\
-``Availability is a measure of the time that is server is functioning
+``Availability is a measure of the time that a is server is functioning
 normally''.\\
 Availability can be calculated with this formula \cite{ha_book}:
 $A=\frac{MTBF}{MTBF +
@@ -566,15 +564,15 @@ A more realistic goal could be 10 minutes downtime per year, this is
 expressed as an availability of 99.998\% \cite{ha_book}.
 
 \subsection{Expectations and realistic goals}
-Unavailability can cost lots of money: people of your online web shop
-might leave and look for another shop, imageinge the stock market that is not
+Unavailability can be costly: people of your online web shop
+might leave and look for another shop, imagine the stock market not
 able to respond, ...\\
-However, we should always try to be realistic in our expectations, if 50\%
+We should always try to be realistic in our expectations, if 50\%
 of a company's data centers fail, there is a good chance not everyone
-will still be able to be server, however, this is such a far-fetched
+will still be able to be server. However, this is such a far-fetched
 scenario that it is probably not cost-effective to try to preempt
 it.\\
-No matter how good an infrastructure is setup, there are always
+No matter how well an infrastructure is set up, there are always
 aspects that are beyond our control \cite{black_swan}, so it is
 important to be careful promising availability percentages to
 customers. 
@@ -592,9 +590,9 @@ For some companies (such as Facebook) one of the reasons why this
 power consumption is so high is that it takes a lot of computation to
 render PHP pages \cite{facebook_php}. Facebook in particular is trying
 to fix this by creating a PHP virtual machine \cite{php_vm}.\\
-Note that using more efficient programming language such as Java or C++ 
-from the start of such projects might make these kind of efforts
-obsolete.
+Note that for such projects, using more computation-efficient
+programming languages (such as C++ and Java) from the start could have
+prevented these efforts.
 
 \section{Climate change}
 Needless to say that numbers in the range of Google's or Facebook's
@@ -647,7 +645,7 @@ server responsible for rendering a scene in an animated movie might only process
 one request per hour \cite{apm:2013}.
 This information usually can be extracted from the log files generated
 by the server application (for example: the request log file for
-Apache httpd). This information than can be pass to Ganglia to be
+Apache httpd). This information than can be passed to Ganglia to be
 stored and monitored together with the other server's statistics
 \cite{ganglia:2013}.
 
@@ -880,7 +878,7 @@ installed. I will use this base virtual machine as a starting point
 for all the virtual machines that I will setup to execute
 experiments.\\
 I will include this base virtual machine in my final deliverable,
-since all other virtual machines can be derived from it be following
+since all other virtual machines can be derived from it by following
 the instructions in this essay.
 
 I also created a shared filesystem, this allows me to share files between the
@@ -971,9 +969,10 @@ in the package build-essential, which I installed earlier}
 
 In order to start/stop and restart the service, I create an init.d
 configuration script.
-I based this script on the code I found on this website: 
-http://koo.fi/blog/2013/03/09/init-script-for-daemonizing-non-forking-processes/
-I included the source code of the nagios\_app init.d config script in src/nagios/init.d/nagios\_app.
+I based this script on the code I found on this website: \\
+http://koo.fi/blog/2013/03/09/init-script-for-daemonizing-non-forking-processes/ \\
+I included the source code of the nagios\_app init.d config script in
+\\ src/nagios/init.d/nagios\_app.
 Now we still need to give the script the correct permissions:
 \begin{lstlisting}[language=bash]
   sudo chmod 755 /etc/init.d/nagios_app
@@ -1137,8 +1136,8 @@ user interface depicted a ``Critical error'' (see \cref{fig:nagios_after_kernel_
     \includegraphics[scale=0.3]{pics/nagios_after_kernel_panic.png}
 \end{figure}
 
-If a node experiences a system failure, it is useful when an action is
-performed that tries to solve the problem. An Ubuntu server can be
+If a node experiences a system failure, it is useful that an action is
+executed that tries to solve the problem. An Ubuntu server can be
 configured to automatically restart upon a kernel panic
 \cite{restart_upon_kernel_panic}, however, when a hardware problem is
 the cause of the system crash, restarting the node will be of no
@@ -1180,12 +1179,13 @@ define command {
 $HOSTNAME$ $HOSTSTATE$
 }
 \end{lstlisting} 
-The script inform-controller simply creates a file
+The script inform-controller simply creates a file \\
 $/media/sf\_ossec\_vm\_share/nodes/node1/crash$ whenever Nagios
 detects 'node1' goes down.
-Find the code for the inform-controller.sh script in src/vm\_controller/inform-controller.sh.
+Find the code for the inform-controller.sh script in \\
+src/vm\_controller/inform-controller.sh.\\
 
-Now we need to detect the creation of the file
+Now we need to detect the creation of the file \\
 $/media/sf\_ossec\_vm\_share/nodes/node1/crash$  on the controller,
 which is a MacOS X system in my testing environment. On MacOS X, this
 can be implemented using ``Folder actions'', with some customised scripts
@@ -1237,8 +1237,8 @@ configure Ganglia using unicast mode.
 Let's start by configuring the 'monitor' cluster node. I adapted the
 default configuration file that was installed with Ganglia based on an
  installation manual \cite{ganglia_install_manual}.
-Find a listing of the most important changes I've made in
-src/ganglia/ganglia\_monitor\_config
+Find a listing of the most important changes I've made in \\
+src/ganglia/ganglia\_monitor\_config \\
 
 The most important segments of this configuration listing are:
 \begin{itemize}
@@ -1280,7 +1280,7 @@ we still need to open the UDP port $gmetad$ is listening on:
 sudo ufw allow 8649/udp
 \end{lstlisting} 
 
-OK, let's take it for as spin! When trying to access the web
+OK, let's take it for a spin! When trying to access the web
 application, there was a problem, Apache was not aware of the ganglia
 web application. After copying Ganglia's Apache configuration to
 $/etc/apache2/sites-enabled$, the web application was functional and
@@ -1312,8 +1312,8 @@ All data is stored in $/var/lib/ganglia/rrds/$, for each cluster,
 there is a directory. In a cluster directory, each node that belongs
 to the cluster has a directory with its name/IP address.
 For example: if we want to look at the CPU user-usage of our 'node1',
-we need to query this file:
-$/var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd$. This file is
+we need to query this file:\\
+$/var/lib/ganglia/rrds/OSSEC/192.168.15.4/cpu\_user.rrd$. \\This file is
 encoded in a binary format; we can export it to a CSV-file using the
 rrd2csv program \cite{rrd2csv}:
 \begin{lstlisting}[language=bash]
@@ -1346,8 +1346,8 @@ extensible and configurable.\\
 Some negative remarks: 
 \begin{itemize}
 \item the documentation is not always up to date and sometimes incomplete
-\item the installation was difficult (largely
-  because of the bad quality of the documentation)
+\item the installation was difficult \footnote{largely
+  because of the bad quality of the documentation}
 \item the installation required a lot of manual configurations,
   maybe it would be better that some working default configuration was
   in place (to give users a working starting point)
@@ -1505,8 +1505,8 @@ mysql> CREATE TABLE friend (first_name text, last_name text);
 \end{lstlisting}
 And we add a friend to it:
 \begin{lstlisting}[language=bash]
-mysql> INSERT INTO friend (first_name, last_name) values ('Eric',
-'Northman');
+mysql> INSERT INTO friend (first_name, last_name) 
+       VALUES ('Eric', 'Northman');
 \end{lstlisting}
 
 The next step is the configuration of the master. Most of the
@@ -1785,8 +1785,8 @@ We also need to restart the drbd daemon:
 sudo /etc/init.d/drbd restart
 \end{lstlisting}
 
-First I started the daemon on 'node1', the daemon waited until the
-daemon I brought the daemon on 'node2' online.
+First I started the DRBD daemon on 'node1', this daemon waited until the
+BRBD daemon on 'node2' came online.
 
 Now we configured the mirrored device $/dev/drbd0$, but we can't use
 this device yet.
@@ -1842,7 +1842,7 @@ default, in my opinion, this should be disabled by default
 \footnote{To disable this, we need to add the line ``usage-count no;''
   to the config file's global section.}.\\
 The online documentation on how to configure the software is
-up-to-date and helpful. It is a nice and interesting software, that easily allows you
+up-to-date and helpful. It is nice and interesting software, that easily allows you
 to setup replication between data centers on block level.
 
 \section{Distributed file system experiment}
@@ -1872,7 +1872,7 @@ infrastructure  (file systems, key value stores,... ). This layer
 communicates with the cluster pool via the CRUSH layer; which
 distributes objects over the different nodes in the cluster, and makes
 sure that they can be fetched optimally. \\
-They architecture allows for easy scaling since nodes can be added and
+The architecture allows for easy scaling since nodes can be added and
 removed while the system is running. When such an event occurs the
 CRUSH layer will automatically rebalance the objects over the cluster.
 
@@ -2065,16 +2065,16 @@ I was quite impressed with how easy it was to use ``ceph-deploy
 to install and configure the cluster. \\
 Because I was interested in why
 this installation and configuration was so easy to run over multiple
-cluster nodes, I read some more on this. I found out there are
+cluster nodes, I read some more on this. I found out there
 is another software that allows for software to be easily deployed and
 configured on clusters with a large amount of nodes: CHEF
 \cite{chef_soft}. Unfortunately I
 did not have the time to look into these software any more, but I
 think they are very interesting to experiment with.\\
 Because of the bug I ran into \cite{ceph_bug_1}, I had to redo the
-installation quite a few time, to figure out a solution for the
+installation quite a few times, to figure out a solution for the
 problem.
-It is good to now that you can undo all installation residues with the
+It is comforting to know that you can undo all installation residues with the
 following commands:
 \begin{lstlisting}[language=bash]
 sudo cp -R ~/ossec-cluster /etc/ceph
@@ -2094,7 +2094,7 @@ It has a clean architecture with different, well-separated layers.\\
 There is the ability to configure what is important: redundancy, read
 speed, write speed or a combination of these (albeit with an
 implication on the amount of hardware that will be necessary).\\
-The system also allows to make snapshots of the entire system or parts
+The system also allows you to make snapshots of the entire system or parts
 of the system.
 
 \section{Database shards experiment}
@@ -2115,9 +2115,9 @@ Some of the solutions that I picked up that looked quite interesting:
 
 For this experiment, I will setup a cluster with 2 MySQL servers (shards), each
 of these servers will have a database with the exact same schema. I will
-than write a program that inserts new data in the appropriate shard
+then write a program that inserts new data in the appropriate shard
 and write a query to fetch data appropriately.
-Handing sharding on application level, or in a layer where the
+Handling sharding on application level, or in a layer where the
 application is build upon, is a common practice
 \cite{tumblr_sharding}. 
 
@@ -2171,8 +2171,11 @@ To create a dedicated user 'plibin' and grant this user access to our
 newly created database (from all the IP address in my local
 (VirtualBox) network), we need these commands:
 \begin{lstlisting}[language=bash]
-mysql> CREATE user 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
-mysql> GRANT ALL privileges on ossec.* TO 'plibin'@'192.168.15.%' IDENTIFIED BY 'plibin';
+mysql> CREATE user 'plibin'@'192.168.15.%' 
+       IDENTIFIED BY 'plibin';
+mysql> GRANT ALL privileges on ossec.* 
+       TO 'plibin'@'192.168.15.%' 
+       IDENTIFIED BY 'plibin';
 \end{lstlisting}
 
 It is import to also pass the password to the $GRANT ALL$
@@ -2244,7 +2247,7 @@ aspects to it: rebalancing your shards, adding new shards, ....
 The application that I conceived is a small experiment, but it clearly
 shows some important aspects of handling shards from an application
 point of view as well as from the database instance point of view.
-The nice things about this example is that several instances of the
+The nice thing about this example is that several instances of the
 application could run simultaneous without any modifications of the
 program.\\
 Implementing parallel queries (parallel in a sense that the query is
@@ -2276,8 +2279,8 @@ can be found in NoSQL databases. Several solutions exist and I
 already mentioned some of them in one of the previous sections
 (see \cref{sec:no_sql}).
 I had hoped to investigate one of these systems in this project, but
-unfortunately, I did not have the time to look into this any
-more. However, this is certainly a technology that I want to 
+unfortunately, I did not have the time to further look into this. 
+However, this is certainly a technology that I want to 
 investigate further. 
 
 \chapter{Creating a `Wikpedia clone' cluster}
@@ -2404,13 +2407,13 @@ revisions included is much bigger: \cite{wikipedia_size} reports it to be severa
 TBs after decompression (in 2010 this was $\approx 5TB$ \cite{wikipedia_full_size}).
 
 \subsection{Interpretation of the statistics}
-There is a significant different between the number of edits and the
+There is a significant difference between the number of edits and the
 number of views (per month).
 The difference appears to be a factor $>1000$ over the last 6 years.
 We can also see that the number of users (viewers) keeps growing
 steadily (linearly) once the instance gained some popularity. 
 From the moment an instance is started up until the moment an
-instance gained popularity, a steep growth takes place; adding
+instance gains popularity, a steep growth takes place; adding
 millions of users (viewers) to the system over a period of a few
 months/years.\\
 The following high-availability and scalability requirements we need to meet:
@@ -2476,7 +2479,7 @@ a HAProxy proxy.
 The current implementation of Wikipedia serves the content to viewers
 using the MediaWiki software, which is PHP software that has to render
 the pages on the server side before it can serve them to the user.
-We no longer store the content in a a database, but as separate file, so
+We no longer store the content in a a database, but as a separate file, so
 we might skip this rendering phase, and serve the files directly
 \footnote{Seperating dynamic and static content is an optimization
   technique that is also advised by W. Tarreau of HAProxy \cite{haproxy:2013}}. 
@@ -2677,11 +2680,11 @@ software is in good shape. \\
 I executed several experiments, and I did not run into a lot of
 bugs. However, for quite some projects, the documentation was not
 really up to date. Because of this, I often had to lookup various
-documents and tutorial.\\
+documents and tutorials.\\
 
 \section{What did I learn}
-I really enjoyed experimenting with these different technologies a lot. I
-learned a lot how these technologies work (architecture-wise) and how
+I really enjoyed experimenting with these different technologies. I
+learned a lot about how these technologies work (architecture-wise) and how
 they can be installed and used.\\
 I covered several aspects of scalable and available system design and
 development: 
