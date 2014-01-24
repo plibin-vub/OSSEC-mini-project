@@ -1,0 +1,16 @@
+[OSSEC-Exam material] Submission of my exam materials
+
+Dear Professor Timmerman, Mr. Fayyad-Kazan,
+
+with this mail I want to submit my deliverables for the OSSEC exam:
+the final report and a draft presentation.
+The presentation already contains all content, but I still need to edit some of the videos (cropping, cutting out some obsolete parts) and finalise some of the images.
+The presentation in attachment does not contain the actual videos (this made the presentation too large). Instead I added a YouTube-URL on every slide that will contain a video during my presentation on the exam.
+
+I also added my last SITREP document to this email.
+
+Can you please let me know whether you received all documents well?
+
+Thanks in advance and kind regards,
+
+Pieter Libin
